@@ -1,0 +1,30 @@
+#define GPFSEL1 0x20200004
+#define GPSET0  0x2020001C
+#define GPCLR0  0x20200028
+
+native do
+    extern void PUT32 ( unsigned int, unsigned int );
+    extern unsigned int GET32 ( unsigned int );
+end
+
+par do
+    loop do
+        _PUT32(GPSET0,1<<16);
+        await 1s;
+        _PUT32(GPCLR0,1<<16);
+        await 2s;
+    end
+with
+    var uint ra;
+    ra = _GET32(GPFSEL1);
+    ra = ra & ~(7<<18);
+    ra = ra | 1<<18;
+    _PUT32(GPFSEL1,ra);
+
+    async do
+        loop do
+            loop i in 0x8000 do end
+            emit 100ms;
+        end
+    end
+end
