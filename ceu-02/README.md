@@ -1,0 +1,3 @@
+- Blink LED off=1s, on=2s.
+- Uses system clock interrupts.
+- Based on <https://github.com/dwelch67/raspberrypi/tree/master/blinker07>.

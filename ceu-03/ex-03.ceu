@@ -1,0 +1,62 @@
+native do
+    extern void _PUT32 ( unsigned int, unsigned int );
+    extern unsigned int _GET32 ( unsigned int );
+
+    unsigned int MailboxWrite ( unsigned int fbinfo_addr, unsigned int channel 
+    )
+    {
+        unsigned int mailbox;
+
+        mailbox=0x2000B880;
+        while(1)
+        {
+            if((_GET32(mailbox+0x18)&0x80000000)==0) break;
+        }
+        _PUT32(mailbox+0x20,fbinfo_addr+channel);
+        return(0);
+    }
+
+    unsigned int MailboxRead ( unsigned int channel )
+    {
+        unsigned int ra;
+        unsigned int mailbox;
+
+        mailbox=0x2000B880;
+        while(1)
+        {
+            while(1)
+            {
+                ra=_GET32(mailbox+0x18);
+                if((ra&0x40000000)==0) break;
+            }
+            //hexstrings(ra);
+            ra=_GET32(mailbox+0x00);
+            //hexstring(ra);
+            if((ra&0xF)==channel) break;
+        }
+        return(ra&0xfffffff0); // TODO: ra>>4 ??
+    }
+
+    static volatile unsigned int FB[] __attribute__((aligned (16))) = {
+        640, 480,
+        640, 480,
+        0,
+        32,
+        0, 0,
+        0, 0
+    };
+
+    ##define assert(x) x
+end
+
+_MailboxWrite(((uint)_FB)+0x40000000, 1);
+
+_assert(_MailboxRead(1) == 0); // TODO: check?
+
+var uint ptr = _FB[8];
+loop i in 640*480 do
+    __PUT32(ptr, 0x000000FF);
+    ptr = ptr + 4;
+end
+
+escape 0;

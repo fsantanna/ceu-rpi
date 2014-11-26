@@ -14,18 +14,9 @@ ra = ra & ~(7<<18);
 ra = ra | 1<<18;
 __PUT32(GPFSEL1,ra);
 
-par do
-    loop do
-        __PUT32(GPSET0,1<<16);   // GPIO16 off
-        await 1s;
-        __PUT32(GPCLR0,1<<16);   // GPIO16 on
-        await 2s;
-    end
-with
-    async do
-        loop do
-            loop i in 0x6800 do end
-            emit 100ms;
-        end
-    end
+loop do
+    __PUT32(GPSET0,1<<16);   // GPIO16 off
+    await 1s;
+    __PUT32(GPCLR0,1<<16);   // GPIO16 on
+    await 2s;
 end
