@@ -1,0 +1,5 @@
+*.o
+.*.swp
+.*.swo
+_ceu_app*
+*.list

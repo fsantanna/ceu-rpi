@@ -21,7 +21,7 @@ clean :
 vectors.o : vectors.s
 	$(ARMGNU)-as vectors.s -o vectors.o
 
-video02.o : video02.c image_data.h
+video02.o : video02.c
 	$(ARMGNU)-gcc $(COPS) -c video02.c -o video02.o
 
 memutils.o : memutils.c
