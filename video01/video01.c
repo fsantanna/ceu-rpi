@@ -1,3 +1,7 @@
+#include "image_smile.h"
+#include "image_ceu.h"
+
+extern void PUT8 ( unsigned int, char );
 extern void PUT32 ( unsigned int, unsigned int );
 extern unsigned int GET32 ( unsigned int );
 
@@ -38,13 +42,11 @@ unsigned int MailboxRead ( unsigned int channel )
 
 int notmain ( void )
 {
-    unsigned int ra,rb;
-
     static volatile unsigned int FB[] __attribute__((aligned (16))) = {
         640, 480,
         640, 480,
         0,
-        32,
+        24,
         0, 0,
         0, 0
     };
@@ -52,11 +54,54 @@ int notmain ( void )
 
     assert(MailboxRead(1) == 0); // TODO: check?
 
-    rb = FB[8];
-    for(ra=0;ra<640*480;ra++)
     {
-        PUT32(rb,0x000000FF);
-        rb+=4;
+        unsigned int ptr = FB[8];
+        int i;
+        for(i=0;i<640*480;i++) {
+            PUT8(ptr++,0x00);
+            //PUT8(ptr++,0xFF);
+            PUT8(ptr++,0x00);
+            PUT8(ptr++,0x00);
+        }
+    }
+
+    {
+        unsigned int ptr = FB[8];
+        ptr += 640*10*3 + 50;
+        int idx = 0;
+        int i, j;
+        for(i=0;i<10;i++) {
+            for(j=0;j<10;j++) {
+                PUT8(ptr++,image_smile[idx++]);
+                PUT8(ptr++,image_smile[idx++]);
+                PUT8(ptr++,image_smile[idx++]);
+            }
+            for(;j<640;j++) {
+                PUT8(ptr++, 0x00);
+                PUT8(ptr++, 0x00);
+                PUT8(ptr++, 0x00);
+            }
+        }
+    }
+
+    {
+        unsigned int ptr = FB[8];
+        ptr += 640*30*3 + 50;
+        int idx = 0;
+        int i, j;
+        for(i=0;i<105;i++) {
+            for(j=0;j<288;j++) {
+                PUT8(ptr++,image_ceu[idx+0]);
+                PUT8(ptr++,image_ceu[idx+2]);   // TODO: why?
+                PUT8(ptr++,image_ceu[idx+1]);   // TODO: why?
+                idx += 3;
+            }
+            for(;j<640;j++) {
+                PUT8(ptr++, 0x00);
+                PUT8(ptr++, 0x00);
+                PUT8(ptr++, 0x00);
+            }
+        }
     }
 
     return(0);

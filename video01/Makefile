@@ -21,7 +21,7 @@ clean :
 vectors.o : vectors.s
 	$(ARMGNU)-as vectors.s -o vectors.o
 
-video01.o : video01.c image_data.h
+video01.o : video01.c image_smile.h image_ceu.h
 	$(ARMGNU)-gcc $(COPS) -c video01.c -o video01.o
 
 kernel.img : loader vectors.o video01.o
@@ -44,7 +44,7 @@ OOPS = -std-compile-opts
 
 clang : video01.bin
 
-video01.bc : video01.c image_data.h
+video01.bc : video01.c image_smile.h image_ceu.h
 	clang $(LOPS) -c video01.c -o video01.bc
 
 video01.clang.elf : loader vectors.o video01.bc

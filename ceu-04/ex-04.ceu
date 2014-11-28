@@ -1,0 +1,54 @@
+native do
+    ##include "image_smile.h"
+    ##define assert(x) x
+end
+
+_console_write("Welcome to Ceu/OS !\n");
+
+input int KEYBOARD;
+
+native @nohold _console_write();
+
+par do
+    var char c;
+    var char[2] str;
+        str[0] = 0;
+        str[1] = 0;
+
+    every c in KEYBOARD do
+        str[0] = c;
+        _console_write(str);
+    end
+with
+    var int x = 100;
+    var int y = 50;
+    every 1s do
+        x = x + 1;
+        y = y + 1;
+
+        var int idx = 0;
+        loop i in 10 do
+            var u32 ptr = _FB_PTR + _FB_PITCH*(y+i) + x*_FB_Bpp;
+            loop j in 10 do
+                var u16 color = (_image_smile[idx+0]<<11)
+                              + (_image_smile[idx+2]<<5)
+                              + (_image_smile[idx+1]<<0);
+                __PUT16(ptr, color);
+                idx = idx + 3;
+                ptr = ptr + _FB_Bpp;
+            end
+        end
+    end
+with
+    async do
+        _UsbInitialise();
+        loop do
+            _KeyboardUpdate();
+            var char c = _KeyboardGetChar();
+            if c != '\0' then
+                emit KEYBOARD => c;
+            end
+            emit 100ms;
+        end
+    end
+end
