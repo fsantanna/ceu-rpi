@@ -16,9 +16,9 @@ TARGET = $(basename $(OBJECT))
 FLASHADDR ?= 0x00
 
 LINKFLAGS += -Wl,--section-start=.export=0x00 \
-			 -Wl,--section-start=.text=0x22   \
+			 -Wl,--section-start=.text=0x24   \
 			 -Wl,-uCEU_EXPORT
-# TODO: 0x22 is hardcoded (size of CEU_EXPORT:  `objdump -d _ceu_tst.o´)
+# TODO: 0x24 is hardcoded (size of CEU_EXPORT:  `objdump -d _ceu_tst.o´)
 
 .PHONY:	all target flash
 
@@ -32,9 +32,9 @@ upload: _upload
 _ceu_%.c: %.ceu
 	ceu $< 	--os --verbose \
 			--out-c $@ \
-			--cpp-exe "$(CPP)" \
 			--cpp-args "$(CFLAGS)"
-	cp /tmp/_ceu_tst.c .
+			#--cpp-exe "$(CPP)"
+	#cp /tmp/_ceu_tst.c .
 #--out-h $(basename $@).h
 #--out-s $(basename $<)_SIZE
 #--out-f $(basename $<)_init

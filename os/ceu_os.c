@@ -1098,7 +1098,7 @@ tceu_app* ceu_sys_load (void* addr)
 #ifdef __AVR
     app->init = (tceu_init) (((word)addr>>1) + (word)init);
 #else
-    app->init = (tceu_init) ((word)addr+(word)init);
+    app->init = (tceu_init) ((word)init);
 #endif
     app->addr = addr;
 
