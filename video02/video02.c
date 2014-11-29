@@ -39,6 +39,7 @@ unsigned int MailboxRead ( unsigned int channel )
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "memutils.h"
+#include "textutils.h"
 #include "teletext.h"
 
 #define CHARSIZE_X	6
@@ -261,6 +262,14 @@ int notmain ( void )
     console_write("1234567890abcdefghijklmnopqrstuvxz\n");
     console_write(BG_GREEN BG_HALF "Reading from tag mailbox\n\n" BG_BLACK);
     console_write(COLOUR_PUSH FG_CYAN "Display resolution: " BG_WHITE BG_HALF BG_HALF);
+
+    char* MEM = (char*)0x8000;
+    console_write("Memory: ");
+    int i;
+    for (i=0; i<16; i++) {
+        console_write(tohex(MEM[i],1));
+    }
+    console_write("\n");
 
 /*
     unsigned int ra,rb;

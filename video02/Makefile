@@ -27,8 +27,11 @@ video02.o : video02.c
 memutils.o : memutils.c
 	$(ARMGNU)-gcc $(COPS) -c memutils.c -o memutils.o
 
-kernel.img : loader vectors.o memutils.o video02.o
-	$(ARMGNU)-ld vectors.o memutils.o video02.o -T loader -o video02.elf
+textutils.o : textutils.c
+	$(ARMGNU)-gcc $(COPS) -c textutils.c -o textutils.o
+
+kernel.img : loader vectors.o memutils.o textutils.o video02.o
+	$(ARMGNU)-ld vectors.o memutils.o textutils.o video02.o -T loader -o video02.elf
 	$(ARMGNU)-objdump -D video02.elf > video02.list
 	$(ARMGNU)-objcopy video02.elf -O ihex video02.hex
 	$(ARMGNU)-objcopy video02.elf -O binary kernel.img
