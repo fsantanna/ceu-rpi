@@ -1,0 +1,67 @@
+native do
+    ##include "image_smile.h"
+    ##define assert(x) x
+    ##define PUT16(a,b) *((volatile u16*)(a)) = b
+/*
+    extern uint InitialiseFrameBuffer(u32 width, u32 height, u32 bitDepth);
+    extern void SetGraphicsAddress (uint addr);
+    extern u32  DrawCharacter (char c, u32 x, u32 y);
+    extern void DrawString    (char* str, u32 length, u32 x, u32 y);
+    extern void KeyboardUpdate  (void);
+    extern char KeyboardGetChar (void);
+*/
+end
+native @nohold _DrawString();
+
+input int KEYBOARD;
+
+var int x = 100;
+var int y = 100;
+
+#define FB_PITCH 1024*2
+#define FB_Bpp   2
+var uint fb = _InitialiseFrameBuffer(1024, 768, 16);
+_SetGraphicsAddress(fb);
+
+_DrawString("Welcome to Ceu/OS!\n", 20, 100, y);
+y = y + 20;
+
+par do
+    var char c;
+    every c in KEYBOARD do
+        _DrawCharacter(c, x, y);
+        x = x + 8;
+    end
+with
+    var int x = 100;
+    var int y = 50;
+    every 1s do
+        x = x + 1;
+        y = y + 1;
+
+        var int idx = 0;
+        loop i in 10 do
+            var u32 ptr = ((uint*)fb)[8] + FB_PITCH*(y+i) + x*FB_Bpp;
+            loop j in 10 do
+                var u16 color = (_image_smile[idx+0]<<11)
+                              + (_image_smile[idx+2]<<5)
+                              + (_image_smile[idx+1]<<0);
+                _PUT16(ptr, color);
+                idx = idx + 3;
+                ptr = ptr + FB_Bpp;
+            end
+        end
+    end
+with
+    async do
+        _UsbInitialise();
+        loop do
+            _KeyboardUpdate();
+            var char c = _KeyboardGetChar();
+            if c != '\0' then
+                emit KEYBOARD => c;
+            end
+            emit 100ms;
+        end
+    end
+end

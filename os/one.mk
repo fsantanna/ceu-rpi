@@ -1,8 +1,10 @@
 CEUDIR ?= /data/ceu/ceu-rpi
 SRECCAT = srec_cat
 
+# TODO: remove 02?
+
 ARMGNU = arm-none-eabi
-CFLAGS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding
+CFLAGS = -Wall -fno-zero-initialized-in-bss -O2 #-nostdlib -nostartfiles -ffreestanding
 CFLAGS += -DCEU_OS -I $(CEUDIR)/os
 CFLAGS += -fpic
 #CFLAGS += -mrelax -mshort-calls #-mcall-prologues -fpic
@@ -14,10 +16,12 @@ endif
 OBJECT = $(addprefix _ceu_, $(addsuffix .o, $(basename $(CEUFILE))))
 TARGET = $(basename $(OBJECT))
 FLASHADDR ?= 0x00
+DATAADDR ?= 0x00
 
 LINKFLAGS += -Wl,--section-start=.export=0x00 \
 			 -Wl,--section-start=.text=0x24   \
 			 -Wl,-uCEU_EXPORT
+			 #-Wl,--section-start=.data=$(DATAADDR) \
 # TODO: 0x24 is hardcoded (size of CEU_EXPORT:  `objdump -d _ceu_tst.o´)
 
 .PHONY:	all target flash
@@ -43,6 +47,7 @@ _ceu_%.o: _ceu_%.c $(LIBS)
 	$(ARMGNU)-gcc $(CFLAGS) $(LINKFLAGS) \
 		-nostartfiles \
 		$^ -o $@
+	# TODO!!!
 	! $(ARMGNU)-objdump -h $@ | fgrep ".data"
 	#$(STRIP) -s $@
 	$(ARMGNU)-size $@

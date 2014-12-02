@@ -1,0 +1,26 @@
+output int KEY;
+
+native do
+    void UsbInitialise   (void);
+    void KeyboardUpdate  (void);
+    char KeyboardGetChar (void);
+    ##include "keyboard.c"
+end
+
+output (char* text)=>void CONSOLE_WRITE;
+await 500ms;
+call CONSOLE_WRITE => "Input...\n";
+
+_UsbInitialise();
+async do
+    loop do
+        _KeyboardUpdate();
+        var char c = _KeyboardGetChar();
+        //await 1s;
+        //var char c = 'x';
+        if c != '\0' then
+call CONSOLE_WRITE => "key...\n";
+            emit KEY => c;
+        end
+    end
+end

@@ -733,12 +733,12 @@ void* CEU_SYS_VEC[CEU_SYS_MAX] __attribute__((used)) = {
  * - i: next position to enqueue
  */
 #if CEU_QUEUE_MAX == 256
-    byte QUEUE[CEU_QUEUE_MAX];
+    byte QUEUE[CEU_QUEUE_MAX] = {0};    /* {0} avoids .bss */
     int  QUEUE_tot = 0;
     u8   QUEUE_get = 0;
     u8   QUEUE_put = 0;
 #else
-    byte QUEUE[CEU_QUEUE_MAX];
+    byte QUEUE[CEU_QUEUE_MAX] = {0};    /* {0} avoids .bss */
     int  QUEUE_tot = 0;
     u16  QUEUE_get = 0;
     u16  QUEUE_put = 0;
@@ -1137,6 +1137,19 @@ printf("<<< %d %d\n", app->isAlive, app->ret);
 */
 
     app->init(app);
+
+/*
+#define GPFSEL1 ((uint*)0x20200004)
+#define GPSET0  ((uint*)0x2020001C)
+#define GPCLR0  ((uint*)0x20200028)
+uint ra;
+ra = *GPFSEL1;
+ra = ra & ~(7<<18);
+ra = ra | 1<<18;
+*GPFSEL1 = ra;
+*GPCLR0 = 1<<16;   // GPIO16 on
+// *GPSET0 = 1<<16;   // GPIO16 off
+*/
 
     /* OS_START */
 

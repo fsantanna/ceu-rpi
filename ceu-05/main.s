@@ -2,5 +2,5 @@
 .globl _start
 _start:
     mov sp,#0x8000
-    bl ceu_os_main
+    bl notmain
 hang: b hang

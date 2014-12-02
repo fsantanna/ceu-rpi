@@ -1,71 +1,75 @@
+###############################################################################
+#	makefile
+#	 by Alex Chadwick
+#
+#	A makefile script for generation of raspberry pi kernel images.
+###############################################################################
 
+# The toolchain to use. arm-none-eabi works, but there does exist 
+# arm-bcm2708-linux-gnueabi.
 ARMGNU ?= arm-none-eabi
 
-COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding 
+# The intermediate directory for compiled object files.
+BUILD = build/
 
-gcc : kernel.img
+# The directory in which source files are stored.
+SOURCE = source/
 
-all : gcc clang
+# The name of the output file to generate.
+TARGET = kernel.img
 
-clean :
-	rm -f *.o
-	rm -f *.bin
-	rm -f *.hex
-	rm -f *.elf
-	rm -f *.list
-	rm -f *.img
-	rm -f *.bc
-	rm -f *.clang.s
+# The name of the assembler listing file to generate.
+LIST = kernel.list
 
+# The name of the map file to generate.
+MAP = kernel.map
 
-vectors.o : vectors.s
-	$(ARMGNU)-as vectors.s -o vectors.o
+# The name of the linker script to use.
+LINKER = kernel.ld
 
-input01.o : input01.c
-	$(ARMGNU)-gcc $(COPS) -c input01.c -o input01.o
+# The names of libraries to use.
+LIBRARIES := csud
 
-memutils.o : memutils.c
-	$(ARMGNU)-gcc $(COPS) -c memutils.c -o memutils.o
+# The names of all object files that must be generated. Deduced from the 
+# assembly code files in source.
+OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))
+OBJECTS += $(patsubst $(SOURCE)%.c,$(BUILD)%.o,$(wildcard $(SOURCE)*.c))
 
-keyboard.o : keyboard.c
-	$(ARMGNU)-gcc $(COPS) -c keyboard.c -o keyboard.o
+# Rule to make everything.
+all: $(TARGET) $(LIST)
 
-kernel.img : loader vectors.o memutils.o keyboard.o input01.o
-	$(ARMGNU)-ld vectors.o memutils.o keyboard.o input01.o libcsud.a -T loader -o input01.elf
-	$(ARMGNU)-objdump -D input01.elf > input01.list
-	$(ARMGNU)-objcopy input01.elf -O ihex input01.hex
-	$(ARMGNU)-objcopy input01.elf -O binary kernel.img
+# Rule to remake everything. Does not include clean.
+rebuild: all
 
+# Rule to make the listing file.
+$(LIST) : $(BUILD)output.elf
+	$(ARMGNU)-objdump -d $(BUILD)output.elf > $(LIST)
 
+# Rule to make the image file.
+$(TARGET) : $(BUILD)output.elf
+	$(ARMGNU)-objcopy $(BUILD)output.elf -O binary $(TARGET) 
 
+# Rule to make the elf file.
+$(BUILD)output.elf : $(OBJECTS) $(LINKER)
+	$(ARMGNU)-ld --no-undefined $(OBJECTS) -L. $(patsubst %,-l %,$(LIBRARIES)) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
 
+# Rule to make the object files.
+#$(BUILD)%.o: $(SOURCE)%.s
+	#$(ARMGNU)-as -I $(SOURCE) $< -o $@
 
+$(BUILD)%.o: $(SOURCE)%.*
+	$(ARMGNU)-gcc -c -I $(SOURCE) $< -o $@
 
-LOPS = -Wall -m32 -emit-llvm
-LLCOPS0 = -march=arm 
-LLCOPS1 = -march=arm -mcpu=arm1176jzf-s
-LLCOPS = $(LLCOPS1)
-COPS = -Wall  -O2 -nostdlib -nostartfiles -ffreestanding
-OOPS = -std-compile-opts
+libs: $(OBJECTS)
+	$(ARMGNU)-ar rc libframebuffer.a build/drawing.o build/frameBuffer.o build/mailbox.o
+	$(ARMGNU)-ar rc libkeyboard.a build/keyboard.o
 
-clang : input01.bin
+$(BUILD):
+	mkdir $@
 
-input01.bc : input01.c
-	clang $(LOPS) -c input01.c -o input01.bc
-
-memutils.bc : memutils.c
-	clang $(LOPS) -c memutils.c -o memutils.bc
-
-input01.clang.elf : loader vectors.o input01.bc memutils.bc
-	llvm-link memutils.bc input01.bc -o input01.nopt.bc
-	opt $(OOPS) input01.nopt.bc -o input01.opt.bc
-	#llc $(LLCOPS) input01.opt.bc -o input01.clang.s
-	#$(ARMGNU)-as input01.clang.s -o input01.clang.o
-	llc $(LLCOPS) -filetype=obj input01.opt.bc -o input01.clang.o
-	$(ARMGNU)-ld -o input01.clang.elf -T loader vectors.o input01.clang.o
-	$(ARMGNU)-objdump -D input01.clang.elf > input01.clang.list
-
-input01.bin : input01.clang.elf
-	$(ARMGNU)-objcopy input01.clang.elf input01.clang.bin -O binary
-
-
+# Rule to clean files.
+clean : 
+	-rm -rf $(BUILD)
+	-rm -f $(TARGET)
+	-rm -f $(LIST)
+	-rm -f $(MAP)

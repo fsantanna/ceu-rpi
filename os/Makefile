@@ -1,7 +1,7 @@
 ARMGNU  = arm-none-eabi
 SRECCAT = srec_cat
 
-CFLAGS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding
+CFLAGS = -Wall -fno-zero-initialized-in-bss #-nostdlib -nostartfiles -ffreestanding
 CFLAGS += -DCEU_OS
 
 all:
@@ -17,6 +17,7 @@ all:
 	$(ARMGNU)-objcopy kernel.elf -O ihex kernel.hex
 	$(SRECCAT) kernel.hex -intel -o kernel.srec
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.bin
+	#-L../input01 -lframebuffer
 
 clean:
 	rm -f *.o
