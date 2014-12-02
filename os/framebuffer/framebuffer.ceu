@@ -1,0 +1,18 @@
+native do
+    extern uint InitialiseFrameBuffer(u32 width, u32 height, u32 bitDepth);
+    extern void SetGraphicsAddress (uint addr);
+    extern u32  DrawCharacter (char c, u32 x, u32 y);
+    extern void DrawString    (char* str, u32 length, u32 x, u32 y);
+    extern void KeyboardUpdate  (void);
+    extern char KeyboardGetChar (void);
+end
+native @nohold _DrawString();
+
+#define FB_PITCH 1024*2
+#define FB_Bpp   2
+var uint fb = _InitialiseFrameBuffer(1024, 768, 16);
+_SetGraphicsAddress(fb);
+
+_DrawString("Welcome to Ceu/OS!\n", 20, 100, 100);
+
+await FOREVER;

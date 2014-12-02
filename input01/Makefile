@@ -59,6 +59,7 @@ $(BUILD)output.elf : $(OBJECTS) $(LINKER)
 
 $(BUILD)%.o: $(SOURCE)%.*
 	$(ARMGNU)-gcc -c -I $(SOURCE) $< -o $@
+	#$(ARMGNU)-gcc -fPIE -mpic-data-is-text-relative -c -I $(SOURCE) $< -o $@
 
 libs: $(OBJECTS)
 	$(ARMGNU)-ar rc libframebuffer.a build/drawing.o build/frameBuffer.o build/mailbox.o
