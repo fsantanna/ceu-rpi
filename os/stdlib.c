@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
 #define MEM_TOTAL 100000
-static char MEM_buf[MEM_TOTAL] = {0};   /* {0} avoids .bss */
-size_t MEM_i = 0;
+static char   MEM_buf[MEM_TOTAL] = {0};   /* {0} avoids .bss */
+static size_t MEM_i = 0;
 
 void* malloc (size_t size) {
     size_t nxt = MEM_i + size;

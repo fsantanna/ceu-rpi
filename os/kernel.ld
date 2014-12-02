@@ -15,6 +15,10 @@ SECTIONS {
         *(.rodata)
     }
 
+    .export : {
+        *(.export)
+    }
+
     /DISCARD/ : {
         *(*)
     }

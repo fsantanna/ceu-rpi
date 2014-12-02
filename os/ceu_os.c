@@ -1083,12 +1083,14 @@ tceu_app* ceu_sys_load (void* addr)
 #endif
 
     tceu_app* app = (tceu_app*) ceu_sys_malloc(sizeof(tceu_app));
-    if (app == NULL)
+    if (app == NULL) {
         return NULL;
+    }
 
     app->data = (tceu_org*) ceu_sys_malloc(size);
-    if (app->data == NULL)
+    if (app->data == NULL) {
         return NULL;
+    }
 
     app->sys_vec = CEU_SYS_VEC;
     app->nxt = NULL;
