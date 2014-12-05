@@ -8,11 +8,22 @@ native do
 end
 native @nohold _DrawString();
 
+input (int* w, int* h)=>void GET_CHARACTER_SIZE do
+    *w = 8;
+    *h = 16;
+end
+
+input (char c, u32 x, u32 y)=>void DRAW_CHARACTER do
+    _DrawCharacter(c, x, y);
+end
+
+input (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING do
+    _DrawString(str, length, x, y);
+end
+
 #define FB_PITCH 1024*2
 #define FB_Bpp   2
 var uint fb = _InitialiseFrameBuffer(1024, 768, 16);
 _SetGraphicsAddress(fb);
-
-_DrawString("Welcome to Ceu/OS!\n", 20, 100, 100);
 
 await FOREVER;

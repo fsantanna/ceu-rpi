@@ -16,7 +16,7 @@ void* CEU_APP_ADDR = NULL;
 #include <assert.h>
 #endif
 
-#if defined(CEU_OS) || defined(CEU_DEBUG)
+#if defined(CEU_DEBUG) || defined(CEU_NEWS) || defined(CEU_THREADS) || defined(CEU_OS)
 #include <stdlib.h>     /* malloc/free, exit */
 #endif
 

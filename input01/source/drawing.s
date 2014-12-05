@@ -183,6 +183,8 @@ DrawCharacter:
 	y .req r5
 	charAddr .req r6
 
+    push {r1,r2,r3,r4,r5,r6,r7,r8,lr}
+
 	cmp r0,#0x7F
 	movhi r0,#0
 	movhi r1,#0
@@ -191,8 +193,7 @@ DrawCharacter:
 	mov x,r1
 	mov y,r2
 
-	push {r4,r5,r6,r7,r8,lr}
-	ldr charAddr,=font
+    ldr charAddr,=font
 	add charAddr, r0,lsl #4
 	
 	lineLoop$:
@@ -231,7 +232,7 @@ DrawCharacter:
 	mov width,#8
 	mov height,#16
 
-	pop {r4,r5,r6,r7,r8,pc}
+    pop {r1,r2,r3,r4,r5,r6,r7,r8,pc}
 	.unreq width
 	.unreq height
 
