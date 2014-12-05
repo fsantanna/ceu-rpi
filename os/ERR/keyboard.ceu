@@ -1,0 +1,51 @@
+output int KEY;
+
+native do
+    void UsbInitialise   (void);
+    void KeyboardUpdate  (void);
+    char KeyboardGetChar (void);
+
+void f (void) {
+UsbInitialise();
+while(1) {
+        KeyboardUpdate();
+        char c = KeyboardGetChar();
+        //await 1s;
+        //var char c = 'x';
+        if (c != '\0') {
+#define GPFSEL1 ((uint*)0x20200004)
+#define GPSET0  ((uint*)0x2020001C)
+#define GPCLR0  ((uint*)0x20200028)
+uint ra;
+ra = *GPFSEL1;
+ra = ra & ~(7<<18);
+ra = ra | 1<<18;
+*GPFSEL1 = ra;
+*GPCLR0 = 1<<16;   // GPIO16 on
+        }
+}
+}
+end
+
+_f();
+_UsbInitialise();
+//async do
+    loop do
+        _KeyboardUpdate();
+        var char c = _KeyboardGetChar();
+        //await 1s;
+        //var char c = 'x';
+        if c != '\0' then
+#define GPFSEL1 ((uint*)0x20200004)
+#define GPSET0  ((uint*)0x2020001C)
+#define GPCLR0  ((uint*)0x20200028)
+var uint ra;
+ra = *GPFSEL1;
+ra = ra & ~(7<<18);
+ra = ra | 1<<18;
+*GPFSEL1 = ra;
+*GPCLR0 = 1<<16;   // GPIO16 on
+            emit KEY => c;
+        end
+    end
+//end
