@@ -12,6 +12,6 @@ call DRAW_STRING => ("> ", 2, 50, 50+h);
 loop i do
     loop j in 100 do
         var char c = await KEY;
-        call DRAW_CHARACTER => ('.', 50+j*w, 50+(i+1)*h);
+        call DRAW_CHARACTER => (c, 50+(j+2)*w, 50+(i+1)*h);
     end
 end

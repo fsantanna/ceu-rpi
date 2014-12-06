@@ -1,17 +1,19 @@
 output (int* w, int* h)=>void GET_CHARACTER_SIZE;
 output (char c, u32 x, u32 y)=>void DRAW_CHARACTER;
 output (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING;
-input int KEY;
+
+native do
+    extern u32  DrawCharacter (char c, u32 x, u32 y);
+end
 
 var int w, h;
 call GET_CHARACTER_SIZE => (&w, &h);
 
 call DRAW_STRING => ("Welcome to Ceu/OS!", 18, 50, 50);
-call DRAW_STRING => ("> ", 2, 50, 50+h);
 
 loop i do
     loop j in 100 do
-        var char c = await KEY;
+        await 500ms;
         call DRAW_CHARACTER => ('.', 50+j*w, 50+(i+1)*h);
     end
 end
