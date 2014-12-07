@@ -17,6 +17,15 @@
 #define AUX_MU_STAT_REG ((u32*)0x20215064)
 #define AUX_MU_BAUD_REG ((u32*)0x20215068)
 
+function @rec (uint c)=>void uart_putc do
+    loop do
+        if *AUX_MU_LSR_REG & 0x20 then
+            break;
+        end
+    end
+    *AUX_MU_IO_REG = c;
+end
+
 par do
     *AUX_ENABLES = 1;
     *AUX_MU_IER_REG = 0;
@@ -30,36 +39,31 @@ par do
     var uint v = *GPFSEL1;
     v = v & ~(7<<12);       //gpio14
     v = v | (2<<12);        //alt5
+    v = v & ~(7<<15);       //gpio15
+    v = v | (2<<15);        //alt5
     *GPFSEL1 = v;
 
     *GPPUD = 0;
     await 1ms;
-    *GPPUDCLK0 = (1<<14);
+    *GPPUDCLK0 = (1<<14)|(1<<15);
     await 1ms;
     *GPPUDCLK0 = 0;
 
-    *AUX_MU_CNTL_REG = 2;
+    *AUX_MU_CNTL_REG = 3;
 
-    loop i do
+    loop do
         loop do
-            if *AUX_MU_LSR_REG & 0x20 then
+            if *AUX_MU_LSR_REG & 0x01 then
                 break;
             end
         end
-        *AUX_MU_IO_REG = 0x30 + (i&7);
+        var uint c = *AUX_MU_IO_REG;
+        *AUX_MU_IO_REG = c;
+        // TODO: putc?
     end
 with
     async do
         loop do
-#define GPFSEL1 ((uint*)0x20200004)
-#define GPSET0  ((uint*)0x2020001C)
-#define GPCLR0  ((uint*)0x20200028)
-var uint ra;
-ra = *GPFSEL1;
-ra = ra & ~(7<<18);
-ra = ra | 1<<18;
-*GPFSEL1 = ra;
-*GPCLR0 = 1<<16;   // GPIO16 on
             loop i in 0x10A do end
             emit 1ms;
         end
