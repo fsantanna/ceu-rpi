@@ -1,0 +1,69 @@
+
+Discarded input sections
+
+ .ARM.attributes
+                0x0000000000000000       0x14 build/main.o
+ .comment       0x0000000000000000       0x20 build/ex-06.o
+ .ARM.attributes
+                0x0000000000000000       0x30 build/ex-06.o
+ .comment       0x0000000000000000       0x20 build/stdlib.o
+ .ARM.attributes
+                0x0000000000000000       0x30 build/stdlib.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD build/main.o
+LOAD build/ex-06.o
+LOAD build/stdlib.o
+
+.init           0x0000000000008000        0xc
+ *(.init)
+ .init          0x0000000000008000        0xc build/main.o
+                0x0000000000008000                _start
+
+.data           0x000000000000800c        0xc
+ *(.data)
+ .data          0x000000000000800c        0x0 build/main.o
+ .data          0x000000000000800c        0x8 build/ex-06.o
+                0x000000000000800c                CEU_REQS
+                0x0000000000008010                CEU_GC
+ .data          0x0000000000008014        0x4 build/stdlib.o
+                0x0000000000008014                MEM_i
+ *.c.o(*)
+
+.rodata
+ *(.rodata)
+ *.c.o(*)
+
+.text           0x0000000000008018      0xbec
+ *.c.o(.text)
+ *(.text)
+ .text          0x0000000000008018        0x0 build/main.o
+ .text          0x0000000000008018      0xa74 build/ex-06.o
+                0x0000000000008018                ceu_sys_req
+                0x0000000000008050                ceu_sys_org
+                0x00000000000080c8                ceu_sys_wclock
+                0x00000000000081b0                ceu_sys_go
+                0x00000000000084cc                ceu_go_all
+                0x0000000000008a48                notmain
+ .text          0x0000000000008a8c      0x178 build/stdlib.o
+                0x0000000000008a8c                malloc
+                0x0000000000008b08                free
+                0x0000000000008b24                memset
+                0x0000000000008b90                memcpy
+
+.bss            0x0000000000008c04    0x186a0
+ *.c.o(.bss)
+ *(.bss)
+ .bss           0x0000000000008c04        0x0 build/main.o
+ .bss           0x0000000000008c04        0x0 build/ex-06.o
+ .bss           0x0000000000008c04    0x186a0 build/stdlib.o
+
+/DISCARD/
+ *(*)
+OUTPUT(build/output.elf elf32-littlearm)

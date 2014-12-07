@@ -1,0 +1,2 @@
+- UART echo
+- Based on <https://github.com/dwelch67/raspberrypi/tree/master/uart02>.
