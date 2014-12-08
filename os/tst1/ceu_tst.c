@@ -1,6 +1,6 @@
-int XXX = 0x12345678;
+static int XXX = 0x12345678;
 
-//__attribute__ ((section (".export")))
+__attribute__ ((section (".export")))
 void CEU_EXPORT (void) {
     if (XXX == 0x12345678) {
         #define GPFSEL1 ((unsigned int*)0x20200004)

@@ -1,11 +1,6 @@
 SECTIONS {
-    .init 0x8000 : {
-		*(.init)
-	}
-
-    .data : {
-		*(.data)
-		*.c.o(*)
+    .export 0x00 : {
+        *(.export)
 	}
 
     .rodata : {
@@ -16,6 +11,11 @@ SECTIONS {
     .text : {
 		*.c.o(.text)
 		*(.text)
+	}
+
+    .data : {
+		*(.data)
+		*.c.o(*)
 	}
 
 /*

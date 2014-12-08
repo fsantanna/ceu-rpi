@@ -6,23 +6,28 @@ CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
-#CFLAGS += -fpic -mpic-data-is-text-relative
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
-#LDFLAGS_ONE = -Wl,--section-start=.export=0x00 -Wl,--section-start=.text=0x10 
-#-Wl,--section-start=.data=0x200
-LDFLAGS_ONE = -Wl,-T../kernel.ld
+CFLAGS_ONE = -fpic -mpic-data-is-text-relative
+LDFLAGS_ONE = -Wl,-T../one.ld
+#LDFLAGS_ONE = -Wl,--section-start=.export=0x00
+# -Wl,--section-start=.text=0x10 -Wl,--section-start=.data=0x200
+#LDFLAGS_ONE = -Wl,-T../kernel.ld -Wl,--image-base
 
 all:
+	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) ceu_tst.c -o ceu_tst.elf
+	! $(ARMGNU)-objdump -h ceu_tst.elf | grep ".got"
+	! $(ARMGNU)-objdump -h ceu_tst.elf | grep ".bss"
+	$(ARMGNU)-objcopy ceu_tst.elf -O binary ceu_tst.bin
+	$(ARMGNU)-objcopy ceu_tst.elf --change-addresses=0x94000 -O ihex ceu_tst.hex
+	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	#$(ARMGNU)-gcc $(CFLAGS) -c ceu_tst.c            -o ceu_tst.o
-	$(ARMGNU)-gcc $(LDFLAGS_ONE) -c ceu_tst.c -o ceu_tst.o
 	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	#$(ARMGNU)-gcc -g $(CFLAGS)
@@ -33,13 +38,13 @@ all:
 	#$(ARMGNU)-objdump -S -D kernel.o > /tmp/kernel.list
 	#$(ARMGNU)-ld $(LDFLAGS) kernel.o -o kernel.elf
 	#TODO
-	#! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
+	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
 	$(ARMGNU)-objdump -S -D kernel.elf > kernel.list
 	$(ARMGNU)-size kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O ihex kernel.hex
 	#cp all.bin kernel.img
-	$(ARMGNU)-objcopy ceu_tst.o --change-addresses=0x100000 -O ihex ceu_tst.hex
+	###
 	$(SRECCAT) kernel.hex -intel -offset -0x8000 ceu_tst.hex -intel -offset -0x8000 -o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
