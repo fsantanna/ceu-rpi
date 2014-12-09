@@ -3,7 +3,7 @@ SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
 CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_OS -I $(CEUDIR)
+CFLAGS += -DCEU_DEBUG -DCEU_OS -I$(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
 #CFLAGS += -fpic -mpic-data-is-text-relative
@@ -18,12 +18,13 @@ all:
 				--out-c _ceu_uart.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_uart.c .
 	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		_ceu_uart.c -o _ceu_uart.elf
 	! $(ARMGNU)-objdump -h _ceu_uart.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_uart.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_uart.elf -O binary _ceu_uart.bin
-	$(ARMGNU)-objcopy _ceu_uart.elf --change-addresses=0x94000 -O ihex _ceu_uart.hex
+	$(ARMGNU)-objcopy _ceu_uart.elf --change-addresses=0x110000 -O ihex _ceu_uart.hex
 	###
 	ceu tst.ceu --os --verbose \
 				--out-c _ceu_tst.c \
@@ -35,11 +36,12 @@ all:
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
-	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x96000 -O ihex _ceu_tst.hex
+	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x112000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
+	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/debug.c    -o debug.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
