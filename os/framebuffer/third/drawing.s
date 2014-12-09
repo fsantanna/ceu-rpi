@@ -30,7 +30,7 @@ graphicsAddress:
 */
 .align 4
 font:
-    .incbin "font.bin"
+    .incbin "tt.fnt"
 
 /*
 * SetForeColour changes the current drawing colour to the 16 bit colour in r0.
