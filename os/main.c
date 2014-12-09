@@ -1,3 +1,4 @@
+#include <debug.h>
 #include "ceu_os.h"
 
 extern void MAIN (void);
@@ -24,6 +25,7 @@ int dt () {
 void ceu_os_main ()
 {
 /*
+debug_init();
 #define FB_PITCH 1024*2
 #define FB_Bpp   2
 uint fb = InitialiseFrameBuffer(1024, 768, 16);
