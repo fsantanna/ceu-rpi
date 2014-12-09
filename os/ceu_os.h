@@ -316,11 +316,7 @@ typedef struct tceu_go {
 #endif
 
 #if defined(CEU_ORGS) || defined(CEU_OS)
-#ifdef __AVR
-    #define CEU_MAX_STACK   32
-#else
-    #define CEU_MAX_STACK   32768
-#endif
+    #define CEU_MAX_STACK   128
     /* TODO: CEU_ORGS is calculable // CEU_NEWS isn't (255?) */
     tceu_stk stk[CEU_MAX_STACK];
 #else
