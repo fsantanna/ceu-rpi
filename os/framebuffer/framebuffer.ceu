@@ -1,4 +1,28 @@
 native do
+    #include <assert.h>
+    #include "framebuffer.h"
+end
+
+_MailboxWrite(((uint)_FB)+0x40000000, 1);
+_assert(_MailboxRead(1) == 0); // TODO: check?
+
+/*
+var uint ptr = _FB[8];
+loop i in 640*480 do
+    _PUT8(ptr+0, 0x00);
+    _PUT8(ptr+1, 0x00);
+    _PUT8(ptr+2, 0xFF);
+    ptr = ptr + 3;
+end
+_DrawCharacter('a', 100, 100);
+*/
+_DrawPixel(100, 100);
+_DrawPixel(101, 101);
+_DrawPixel(102, 102);
+_DrawPixel(103, 103);
+
+/*
+native do
     extern uint InitialiseFrameBuffer(u32 width, u32 height, u32 bitDepth);
     extern void SetGraphicsAddress (uint addr);
     extern u32  DrawCharacter (char c, u32 x, u32 y);
@@ -21,9 +45,25 @@ input (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING do
     _DrawString(str, length, x, y);
 end
 
+native do
+##include <debug.h>
+void* GetGraphicsAddress(void);
+end
+native @nohold _debug(), _tohex();
+_debug_init();
+
 #define FB_PITCH 1024*2
 #define FB_Bpp   2
 var uint fb = _InitialiseFrameBuffer(1024, 768, 16);
 _SetGraphicsAddress(fb);
 
+_debug("FB: ");
+_debug(_tohex(fb,4));
+_debug("  ");
+_debug(_tohex(*((void**)_GetGraphicsAddress()),4));
+_debug("\n");
+
+_DrawString("oioi", 4, 100, 100);
+
+*/
 await FOREVER;
