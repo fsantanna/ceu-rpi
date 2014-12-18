@@ -21,7 +21,7 @@ clean :
 vectors.o : vectors.s
 	$(ARMGNU)-as vectors.s -o vectors.o
 
-ex-03.o : ex-03.c image_data.h ceu
+ex-03.o : ex-03.c ceu
 	$(ARMGNU)-gcc $(COPS) -c ex-03.c -o ex-03.o
 
 ceu:
@@ -47,7 +47,7 @@ OOPS = -std-compile-opts
 
 clang : ex-03.bin
 
-ex-03.bc : ex-03.c image_data.h
+ex-03.bc : ex-03.c
 	clang $(LOPS) -c ex-03.c -o ex-03.bc
 
 ex-03.clang.elf : loader vectors.o ex-03.bc

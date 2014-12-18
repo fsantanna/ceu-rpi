@@ -1,6 +1,7 @@
 native do
-    extern void _PUT32 ( unsigned int, unsigned int );
-    extern unsigned int _GET32 ( unsigned int );
+    ##define PUT8(x,y)  (*((volatile unsigned char*)(x))) = y
+    ##define GET32(x)   (*((volatile unsigned int*)(x)))
+    ##define PUT32(x,y) (*((volatile unsigned int*)(x))) = y
 
     unsigned int MailboxWrite ( unsigned int fbinfo_addr, unsigned int channel 
     )
@@ -10,9 +11,9 @@ native do
         mailbox=0x2000B880;
         while(1)
         {
-            if((_GET32(mailbox+0x18)&0x80000000)==0) break;
+            if((GET32(mailbox+0x18)&0x80000000)==0) break;
         }
-        _PUT32(mailbox+0x20,fbinfo_addr+channel);
+        PUT32(mailbox+0x20,fbinfo_addr+channel);
         return(0);
     }
 
@@ -26,11 +27,11 @@ native do
         {
             while(1)
             {
-                ra=_GET32(mailbox+0x18);
+                ra=GET32(mailbox+0x18);
                 if((ra&0x40000000)==0) break;
             }
             //hexstrings(ra);
-            ra=_GET32(mailbox+0x00);
+            ra=GET32(mailbox+0x00);
             //hexstring(ra);
             if((ra&0xF)==channel) break;
         }
@@ -41,7 +42,7 @@ native do
         640, 480,
         640, 480,
         0,
-        32,
+        24,
         0, 0,
         0, 0
     };
@@ -55,8 +56,11 @@ _assert(_MailboxRead(1) == 0); // TODO: check?
 
 var uint ptr = _FB[8];
 loop i in 640*480 do
-    __PUT32(ptr, 0x000000FF);
-    ptr = ptr + 4;
+    _PUT8(ptr+0,0x00);
+    _PUT8(ptr+2,0x00);
+    _PUT8(ptr+1,0xFF);
+    //_PUT32(ptr, 0x00FF00FF);
+    ptr = ptr + 3;
 end
 
 escape 0;

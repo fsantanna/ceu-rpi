@@ -59,12 +59,12 @@ int notmain ( void )
         int i;
         for(i=0;i<640*480;i++) {
             PUT8(ptr++,0x00);
-            //PUT8(ptr++,0xFF);
-            PUT8(ptr++,0x00);
+            PUT8(ptr++,0xFF);
             PUT8(ptr++,0x00);
         }
     }
 
+/*
     {
         unsigned int ptr = FB[8];
         ptr += 640*10*3 + 50;
@@ -103,6 +103,7 @@ int notmain ( void )
             }
         }
     }
+*/
 
     return(0);
 }
