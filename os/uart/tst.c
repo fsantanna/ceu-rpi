@@ -1,8 +1,5 @@
 #include "ceu_os.h"
 
-void CEU_EXPORT_UART (uint* size, tceu_init** init);
-void CEU_EXPORT_TST  (uint* size, tceu_init** init);
-
 void MAIN (void)
 {
     tceu_app* uart = ceu_sys_load((void*)0x110000);

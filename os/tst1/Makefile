@@ -20,7 +20,7 @@ all:
 	! $(ARMGNU)-objdump -h ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h ceu_tst.elf | grep ".bss"
 	$(ARMGNU)-objcopy ceu_tst.elf -O binary ceu_tst.bin
-	$(ARMGNU)-objcopy ceu_tst.elf --change-addresses=0x94000 -O ihex ceu_tst.hex
+	$(ARMGNU)-objcopy ceu_tst.elf --change-addresses=0x110000 -O ihex ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
@@ -47,6 +47,11 @@ all:
 	###
 	$(SRECCAT) kernel.hex -intel -offset -0x8000 ceu_tst.hex -intel -offset -0x8000 -o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+sdcard:
+	sudo mount /dev/sdb1 /mnt
+	sudo cp kernel.img /mnt/kernel.img
+	sudo umount /mnt
 
 clean:
 	find . -name "*.exe"  | xargs rm -f

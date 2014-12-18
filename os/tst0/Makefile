@@ -41,6 +41,11 @@ all:
 #$(ARMGNU)-objcopy --change-addresses=$(FLASHADDR) -O ihex $@ $(TARGET).hex
 #$(SRECCAT) $(TARGET).hex -intel -o $(TARGET).srec
 
+sdcard:
+	sudo mount /dev/sdb1 /mnt
+	sudo cp kernel.img /mnt/kernel.img
+	sudo umount /mnt
+
 clean:
 	find . -name "*.exe"  | xargs rm -f
 	find . -name "_ceu_*" | xargs rm -f
