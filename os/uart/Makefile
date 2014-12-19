@@ -10,7 +10,7 @@ CFLAGS += -fno-zero-initialized-in-bss
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
-CFLAGS_ONE = -fpic -mpic-data-is-text-relative
+CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 LDFLAGS_ONE = -Wl,-T../one.ld
 
 all:
@@ -66,6 +66,11 @@ all:
 			   _ceu_tst.hex  -intel -offset -0x8000 \
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+sdcard:
+	sudo mount /dev/sdb1 /mnt
+	sudo cp kernel.img /mnt/kernel.img
+	sudo umount /mnt
 
 clean:
 	find . -name "*.exe"  | xargs rm -f
