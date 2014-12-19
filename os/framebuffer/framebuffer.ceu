@@ -3,15 +3,18 @@ native do
     #include "framebuffer.h"
 end
 
+input (uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_PIXEL do
+    _FB_draw_pixel(x,y, r,g,b);
+end
+
 _FB_init();
 
+/*
 loop line in 480 do
     loop col in 640 do
         _FB_draw_pixel(line,col, line,col,line+col);
     end
 end
-
-/*
 
 var uint ptr = _FB[8];
 loop i in 640*480 do

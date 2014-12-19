@@ -1,10 +1,15 @@
+output (uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_PIXEL;
+
+loop line in 480 do
+    loop col in 640 do
+        call DRAW_PIXEL => (line,col, line,col,line+col);
+    end
+end
+
+/*
 output (int* w, int* h)=>void GET_CHARACTER_SIZE;
 output (char c, u32 x, u32 y)=>void DRAW_CHARACTER;
 output (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING;
-
-native do
-    extern u32  DrawCharacter (char c, u32 x, u32 y);
-end
 
 var int w, h;
 call GET_CHARACTER_SIZE => (&w, &h);
@@ -17,3 +22,4 @@ loop i do
         call DRAW_CHARACTER => ('.', 50+j*w, 50+(i+1)*h);
     end
 end
+*/
