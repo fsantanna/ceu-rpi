@@ -4,5 +4,7 @@
 void FB_init (void);
 void FB_draw_pixel (unsigned int x, unsigned int y,
                     unsigned char r, unsigned char g, unsigned char b);
+void FB_draw_character (char c, unsigned int x, unsigned int y,
+                        unsigned char r, unsigned char g, unsigned char b);
 
 #endif

@@ -7,92 +7,24 @@ input (uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_PIXEL do
     _FB_draw_pixel(x,y, r,g,b);
 end
 
-_FB_init();
+input (int* w, int* h)=>void GET_CHARACTER_SIZE do
+    *w = 5;
+    *h = 9;
+end
 
-/*
-loop line in 480 do
-    loop col in 640 do
-        _FB_draw_pixel(line,col, line,col,line+col);
+input (char c, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_CHARACTER do
+    _FB_draw_character(c, x,y, r,g,b);
+end
+
+input @rec (char* str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_STRING do
+    loop i in length do
+        if str[i] == '\0' then
+            break;
+        end
+        _FB_draw_character(str[i], x+(6*i), y, r,g,b);
     end
 end
 
-var uint ptr = _FB[8];
-loop i in 640*480 do
-    _PUT8(ptr+0, 0x00);
-    _PUT8(ptr+1, 0x00);
-    _PUT8(ptr+2, 0x6F);
-    ptr = ptr + 3;
-end
-_DrawCharacter('a', 100, 100);
+_FB_init();     /* TODO: have parameters and become a "call" */
 
-do
-    var uint addr = _FB[8] + (200 + 200*_FB[0]) * _FB_BPP;
-    _PUT8(addr+0, 0xFF);
-    _PUT8(addr+1, 0xFF);
-    _PUT8(addr+2, 0xFF);
-end
-do
-    var uint addr = _FB[8] + (201 + 201*_FB[0]) * _FB_BPP;
-    _PUT8(addr+0, 0xFF);
-    _PUT8(addr+1, 0xFF);
-    _PUT8(addr+2, 0xFF);
-end
-do
-    var uint addr = _FB[8] + (202 + 202*_FB[0]) * _FB_BPP;
-    _PUT8(addr+0, 0xFF);
-    _PUT8(addr+1, 0xFF);
-    _PUT8(addr+2, 0xFF);
-end
-
-_DrawPixel(100, 100);
-_DrawPixel(101, 101);
-_DrawPixel(102, 102);
-_DrawPixel(103, 103);
-*/
-
-/*
-native do
-    extern uint InitialiseFrameBuffer(u32 width, u32 height, u32 bitDepth);
-    extern void SetGraphicsAddress (uint addr);
-    extern u32  DrawCharacter (char c, u32 x, u32 y);
-    extern void DrawString    (char* str, u32 length, u32 x, u32 y);
-    extern void KeyboardUpdate  (void);
-    extern char KeyboardGetChar (void);
-end
-native @nohold _DrawString();
-
-input (int* w, int* h)=>void GET_CHARACTER_SIZE do
-    *w = 8;
-    *h = 16;
-end
-
-input (char c, u32 x, u32 y)=>void DRAW_CHARACTER do
-    _DrawCharacter(c, x, y);
-end
-
-input (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING do
-    _DrawString(str, length, x, y);
-end
-
-native do
-##include <debug.h>
-void* GetGraphicsAddress(void);
-end
-native @nohold _debug(), _tohex();
-_debug_init();
-
-#define FB_PITCH 1024*2
-#define FB_Bpp   2
-var uint fb = _InitialiseFrameBuffer(1024, 768, 16);
-_SetGraphicsAddress(fb);
-
-_debug("FB: ");
-_debug(_tohex(fb,4));
-_debug("  ");
-_debug(_tohex(*((void**)_GetGraphicsAddress()),4));
-_debug("\n");
-
-_DrawString("oioi", 4, 100, 100);
-
-*/
 await FOREVER;

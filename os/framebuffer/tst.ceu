@@ -1,4 +1,11 @@
-output (uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_PIXEL;
+output (uint x, uint y, u8 r, u8 g, u8 b)=>void
+    DRAW_PIXEL;
+output (int* w, int* h)=>void
+    GET_CHARACTER_SIZE;
+output (char c, uint x, uint y, u8 r, u8 g, u8 b)=>void
+    DRAW_CHARACTER;
+output @rec (char* str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void
+    DRAW_STRING;
 
 loop line in 480 do
     loop col in 640 do
@@ -6,20 +13,24 @@ loop line in 480 do
     end
 end
 
-/*
-output (int* w, int* h)=>void GET_CHARACTER_SIZE;
-output (char c, u32 x, u32 y)=>void DRAW_CHARACTER;
-output (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING;
+await 2s;
+
+loop line in 480 do
+    loop col in 640 do
+        call DRAW_PIXEL => (line,col, 0,0,0);
+    end
+end
+
+await 2s;
 
 var int w, h;
 call GET_CHARACTER_SIZE => (&w, &h);
 
-call DRAW_STRING => ("Welcome to Ceu/OS!", 18, 50, 50);
+loop i in 10 do
+    call DRAW_CHARACTER => ('a'+i, 10+i*(w+1),10, 0xFF,0xFF,0xFF);
+end
 
 loop i do
-    loop j in 100 do
-        await 500ms;
-        call DRAW_CHARACTER => ('.', 50+j*w, 50+(i+1)*h);
-    end
+    call DRAW_STRING => ("Hello World!", 20, 10, 20+(i*10), 0xFF,0xFF,0xFF);
+    await 1s;
 end
-*/

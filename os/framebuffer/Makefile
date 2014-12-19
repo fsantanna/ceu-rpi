@@ -10,7 +10,7 @@ CFLAGS += -fno-zero-initialized-in-bss
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
-CFLAGS_ONE = -fpic -mpic-data-is-text-relative
+CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 LDFLAGS_ONE = -Wl,-T../one.ld
 
 all:

@@ -9,8 +9,9 @@ void MAIN (void)
     assert(tst         != NULL);
 
     ceu_sys_link( tst,1  ,  framebuffer,243 );
-    //ceu_sys_link( tst,2  ,  framebuffer,242 );
-    //ceu_sys_link( tst,3  ,  framebuffer,241 );
+    ceu_sys_link( tst,2  ,  framebuffer,242 );
+    ceu_sys_link( tst,3  ,  framebuffer,241 );
+    ceu_sys_link( tst,4  ,  framebuffer,240 );
 
     ceu_sys_start(framebuffer);
     ceu_sys_start(tst);

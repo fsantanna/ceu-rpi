@@ -1,5 +1,6 @@
-#include "assert.h"
+#include <assert.h>
 #include "framebuffer.h"
+#include "teletext.h"
 
 #define PUT8(x,y)  (*((volatile unsigned char*)(x))) = y
 #define GET32(x)   (*((volatile unsigned int*)(x)))
@@ -62,4 +63,20 @@ void FB_draw_pixel (unsigned int x, unsigned int y,
     PUT8(addr+0, r);
     PUT8(addr+1, g);
     PUT8(addr+2, b);
+}
+
+void FB_draw_character (char c, unsigned int x, unsigned int y,
+                        unsigned char r, unsigned char g, unsigned char b) {
+    unsigned char* CHAR = FB_FONT[c-' '];   // 9=bytes per char
+    int row, col;
+
+    assert(c>=0x20 && c<0x7F);   // [SPC,DEL[
+
+    for (row=0; row<9; row++) {        // 9=lines per char
+        for (col=0; col<5; col++) {   // 5=row per char
+            if (CHAR[row] & (1<<(4-col))) {
+                FB_draw_pixel(x+col, y+row, r, g, b);
+            }
+        }
+    }
 }
