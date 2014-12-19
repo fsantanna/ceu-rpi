@@ -1,17 +1,20 @@
+// FRAMEBUFFER
 output (int* w, int* h)=>void GET_CHARACTER_SIZE;
-output (char c, u32 x, u32 y)=>void DRAW_CHARACTER;
-output (char* str, u32 length, u32 x, u32 y)=>void DRAW_STRING;
+output (char c, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_CHARACTER;
+output @rec (char* str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_STRING;
+
+// KEYBOARD
 input int KEY;
 
 var int w, h;
 call GET_CHARACTER_SIZE => (&w, &h);
 
-call DRAW_STRING => ("Welcome to Ceu/OS!", 18, 50, 50);
-call DRAW_STRING => ("> ", 2, 50, 50+h);
+call DRAW_STRING => ("Welcome to Ceu/OS!", 18, 50, 50, 0xFF,0xFF,0xFF);
+call DRAW_STRING => ("> ", 2, 50, 50+h, 0xFF,0xFF,0xFF);
 
 loop i do
     loop j in 100 do
         var char c = await KEY;
-        call DRAW_CHARACTER => (c, 50+(j+2)*w, 50+(i+1)*h);
+        call DRAW_CHARACTER => (c, 50+(j+2)*w, 50+(i+1)*h, 0xFF,0xFF,0xFF);
     end
 end

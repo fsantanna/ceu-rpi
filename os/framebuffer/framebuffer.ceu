@@ -27,4 +27,12 @@ end
 
 _FB_init();     /* TODO: have parameters and become a "call" */
 
+/*
+loop line in 480 do
+    loop col in 640 do
+        _FB_draw_pixel(line,col, line,col,line+col);
+    end
+end
+*/
+
 await FOREVER;
