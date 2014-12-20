@@ -1,8 +1,4 @@
-void UsbCheckForChange (void);
-int KeyboardCount (void);
-unsigned int KeyboardGetAddress (int);
-int KeyboardPoll (unsigned int);
-unsigned short KeyboardGetKeyDown (unsigned int, int);
+#include "csud.h"
 
 #define KEYS_NBYTES 13
 
@@ -42,21 +38,21 @@ static char KeysShift[] = {
     '8', '9', '0', '.', '|', 0x0, 0x0, '='
 };
 
-void KeyboardUpdate () {
+void KeyboardUpdate (void) {
     KeyboardAddress = 0;    // TODO
     if (KeyboardAddress == 0) {
-        //UsbCheckForChange();
-        int n = 0;// KeyboardCount();
+        UsbCheckForChange();
+        int n = KeyboardCount();
         if (n == 0) {
             return;
         }
-        //KeyboardAddress = KeyboardGetAddress(0);
+        KeyboardAddress = KeyboardGetAddress(0);
         if (KeyboardAddress == 0) {
             return;
         }
     }
 
-    int ret = 0;//KeyboardPoll(KeyboardAddress);
+    int ret = KeyboardPoll(KeyboardAddress);
     if (ret != 0) {
         KeyboardAddress = 0;
         return;
@@ -67,7 +63,7 @@ void KeyboardUpdate () {
         KeyboardNewDown[i] = 0;
     }
     for (i=0; i<6; i++) {
-        unsigned short code = 0;//KeyboardGetKeyDown(KeyboardAddress, i);
+        unsigned short code = KeyboardGetKeyDown(KeyboardAddress, i);
         if (code != 0) {
             int Byte = code / 8;
             int Bit  = code % 8;
@@ -78,13 +74,13 @@ void KeyboardUpdate () {
     }
 }
 
-int KeyIsDown (char* keys, unsigned short code) {
+static int KeyIsDown (char* keys, unsigned short code) {
     int Byte = code / 8;
     int Bit  = code % 8;
     return keys[Byte] & (1 << Bit);
 }
 
-char KeyboardGetChar () {
+char KeyboardGetChar (void) {
     char ret = 0;
     int i;
     for (i=0; i<8*KEYS_NBYTES; i++) {

@@ -1,9 +1,8 @@
 output int KEY;
 
 native do
-    void UsbInitialise   (void);
-    void KeyboardUpdate  (void);
-    char KeyboardGetChar (void);
+    #include "csud.h"
+    #include "keyboard.h"
 end
 
 _UsbInitialise();
