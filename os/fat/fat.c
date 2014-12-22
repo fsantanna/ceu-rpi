@@ -109,7 +109,7 @@ struct fat_BS
 #define VFAT		3
 
 static struct dirent *fat_read_dir(struct fat_fs *fs, struct dirent *d);
-struct dirent *fat_read_directory(struct fs *fs, char **name);
+static struct dirent *fat_read_directory(struct fs *fs, char **name);
 static uint32_t fat_get_next_bdev_block_num(uint32_t f_block_idx, FILE *s, void *opaque, int add_blocks);
 
 struct fat_file_block_offset
@@ -124,13 +124,13 @@ static FILE *fat_fopen(struct fs *fs, struct dirent *path, const char *mode)
 {
 	if(fs != path->fs)
 	{
-		errno = EFAULT;
+        //errno = EFAULT;
 		return (FILE *)0;
 	}
 
 	if(strcmp(mode, "r"))
 	{
-		errno = EROFS;
+        //errno = EROFS;
 		return (FILE *)0;
 	}
 
@@ -373,7 +373,7 @@ static uint32_t get_next_fat_entry(struct fat_fs *fs, uint32_t current_cluster)
 	}
 }
 
-struct dirent *fat_read_directory(struct fs *fs, char **name)
+static struct dirent *fat_read_directory(struct fs *fs, char **name)
 {
 	struct dirent *cur_dir = fat_read_dir((struct fat_fs *)fs, (void*)0);
 	while(*name)
@@ -386,7 +386,7 @@ struct dirent *fat_read_directory(struct fs *fs, char **name)
 			{
 				if(!cur_dir->is_dir)
 				{
-					errno = ENOTDIR;
+                    //errno = ENOTDIR;
 					return (void*)0;
 				}
 				found = 1;
@@ -401,7 +401,7 @@ struct dirent *fat_read_directory(struct fs *fs, char **name)
 #ifdef FAT_DEBUG
 			printf("FAT: path part %s not found\n", *name);
 #endif
-			errno = ENOENT;
+            //errno = ENOENT;
 			return (void*)0;
 		}
 	}
@@ -432,7 +432,7 @@ static uint32_t fat_get_next_bdev_block_num(uint32_t f_block_idx, FILE *s, void 
 	}
 }
 
-struct dirent *fat_read_dir(struct fat_fs *fs, struct dirent *d)
+static struct dirent *fat_read_dir(struct fat_fs *fs, struct dirent *d)
 {
 	int is_root = 0;
 	struct fat_fs *fat = (struct fat_fs *)fs;

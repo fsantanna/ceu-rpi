@@ -261,8 +261,8 @@ static char *err_irpts[] = { "CMD_TIMEOUT", "CMD_CRC", "CMD_END_BIT", "CMD_INDEX
 	"AUTO_CMD12", "ADMA", "TUNING", "RSVD" };
 #endif
 
-int sd_read(struct block_device *, uint8_t *, size_t buf_size, uint32_t);
-int sd_write(struct block_device *, uint8_t *, size_t buf_size, uint32_t);
+static int sd_read(struct block_device *, uint8_t *, size_t buf_size, uint32_t);
+static int sd_write(struct block_device *, uint8_t *, size_t buf_size, uint32_t);
 
 static uint32_t sd_commands[] = {
     SD_CMD_INDEX(0),
@@ -2085,7 +2085,7 @@ static int sd_do_data_command(struct emmc_block_dev *edev, int is_write, uint8_t
     return 0;
 }
 
-int sd_read(struct block_device *dev, uint8_t *buf, size_t buf_size, uint32_t block_no)
+static int sd_read(struct block_device *dev, uint8_t *buf, size_t buf_size, uint32_t block_no)
 {
 	// Check the status of the card
 	struct emmc_block_dev *edev = (struct emmc_block_dev *)dev;
@@ -2107,7 +2107,7 @@ int sd_read(struct block_device *dev, uint8_t *buf, size_t buf_size, uint32_t bl
 }
 
 #ifdef SD_WRITE_SUPPORT
-int sd_write(struct block_device *dev, uint8_t *buf, size_t buf_size, uint32_t block_no)
+static int sd_write(struct block_device *dev, uint8_t *buf, size_t buf_size, uint32_t block_no)
 {
 	// Check the status of the card
 	struct emmc_block_dev *edev = (struct emmc_block_dev *)dev;

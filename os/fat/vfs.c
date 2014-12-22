@@ -280,7 +280,7 @@ size_t fwrite(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
 	if(stream == NULL)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return 0;
 	}
 
@@ -299,7 +299,7 @@ size_t fwrite(void *ptr, size_t size, size_t nmemb, FILE *stream)
 		bytes_to_write = nmemb_to_write * size;
 		if(stream->fs->fwrite == NULL)
 		{
-			errno = EROFS;
+            //errno = EROFS;
 			return 0;
 		}
 		bytes_to_write = stream->fs->fwrite(stream->fs, ptr, bytes_to_write, stream);
@@ -311,7 +311,7 @@ int fflush(FILE *fp)
 {
 	if(fp == NULL)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 	if(fp->fflush_cb)
@@ -325,7 +325,7 @@ int fclose(FILE *fp)
 {
 	if(fp == NULL)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 	fflush(fp);
@@ -340,7 +340,7 @@ int feof(FILE *stream)
 {
 	if(!stream)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 	if(stream->flags & VFS_FLAGS_EOF)
@@ -353,7 +353,7 @@ int ferror(FILE *stream)
 {
 	if(!stream)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 	if(stream->flags & VFS_FLAGS_ERROR)
@@ -366,7 +366,7 @@ long fsize(FILE *stream)
 {
 	if(!stream)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 	if(stream->fs->fsize)
@@ -379,7 +379,7 @@ long ftell(FILE *stream)
 {
 	if(!stream)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 	if(stream->fs->ftell)
@@ -392,7 +392,7 @@ int fseek(FILE *stream, long offset, int whence)
 {
 	if(!stream)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return -1;
 	}
 
@@ -428,14 +428,14 @@ FILE *fopen(const char *path, const char *mode)
 
 	if(path == (void *)0)
 	{
-		errno = EFAULT;
+        //errno = EFAULT;
 		return (void*)0;
 	}
 
 	p = split_dir(path, &ve);
 	if(p == (void *)0)
 	{
-		errno = EFAULT;
+        //errno = EFAULT;
 		return (void *)0;
 	}
 
@@ -449,7 +449,7 @@ FILE *fopen(const char *path, const char *mode)
 			return ve->fs->fopen(ve->fs, NULL, mode);
 		else
 		{
-			errno = EFAULT;
+            //errno = EFAULT;
 			return NULL;
 		}
 	}

@@ -660,7 +660,8 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 #endif  /* linux */
 #endif  /* HAVE_MREMAP */
 #ifndef MALLOC_FAILURE_ACTION
-#define MALLOC_FAILURE_ACTION  errno = ENOMEM;
+#define MALLOC_FAILURE_ACTION
+//#define MALLOC_FAILURE_ACTION  errno = ENOMEM;
 #endif  /* MALLOC_FAILURE_ACTION */
 #ifndef HAVE_MORECORE
 #if ONLY_MSPACES
@@ -2628,7 +2629,7 @@ struct malloc_params {
   flag_t default_mflags;
 };
 
-static struct malloc_params mparams;
+static struct malloc_params mparams = {0};
 
 /* Ensure mparams initialized */
 #define ensure_initialization() (void)(mparams.magic != 0 || init_mparams())
@@ -2636,7 +2637,7 @@ static struct malloc_params mparams;
 #if !ONLY_MSPACES
 
 /* The global malloc_state used for all non-"mspace" calls */
-static struct malloc_state _gm_;
+static struct malloc_state _gm_ = {0};
 #define gm                 (&_gm_)
 #define is_global(M)       ((M) == &_gm_)
 

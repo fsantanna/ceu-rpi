@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int errno;
+//int errno;
 
 void *memcpy(void *dest, const void *src, size_t n)
 {

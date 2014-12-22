@@ -42,7 +42,7 @@ struct timer_wait register_timer(useconds_t usec)
 
 	if(usec < 0)
 	{
-		errno = EINVAL;
+        //errno = EINVAL;
 		return tw;
 	}
 	uint32_t cur_timer = mmio_read(TIMER_CLO);

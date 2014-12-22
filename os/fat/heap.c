@@ -31,10 +31,10 @@
 #define MAX_BUF 0x100000
 #endif
 
-static char _end[MAX_BRK];
+static char _end[MAX_BRK] = {0};
 
-uint32_t cur_brk = 0;
-uintptr_t cur_buf = MAX_BRK;
+static uint32_t cur_brk = 0;
+static uintptr_t cur_buf = MAX_BRK;
 
 uintptr_t alloc_buf(size_t size)
 {
