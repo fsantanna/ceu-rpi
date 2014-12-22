@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef int useconds_t;
+typedef unsigned long useconds_t;
 
 struct timer_wait
 {

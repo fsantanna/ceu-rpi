@@ -49,9 +49,9 @@ all:
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c heap.c -o heap.o
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c printf.c -o printf.o
 	# all
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		div.o libfs.o emmc.o block.o mbr.o fat.o vfs.o timer.o mmio.o main.o boot.o \
-		mbox.o stdlib.o heap.o malloc.o printf.o \
+	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		div.o libfs.o emmc.o block.o mbr.o fat.o vfs.o timer.o mmio.o boot.o \
+		mbox.o stdlib.o heap.o malloc.o printf.o main.o \
 		_ceu_fat.c -o _ceu_fat.elf -lgcc
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_FAT) $(LDFLAGS_ONE)
 		#div.c libfs.c emmc.c block.c mbr.c fat.c vfs.c timer.c mmio.c crc32.c
@@ -72,7 +72,7 @@ all:
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
-	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x113000 -O ihex _ceu_tst.hex
+	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x210000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
@@ -97,9 +97,9 @@ all:
 	$(ARMGNU)-objcopy kernel.elf -O ihex kernel.hex
 	#cp all.bin kernel.img
 	###
-	$(SRECCAT) kernel.hex    		-intel -offset -0x8000 \
-			   _ceu_framebuffer.hex -intel -offset -0x8000 \
-			   _ceu_tst.hex  		-intel -offset -0x8000 \
+	$(SRECCAT) kernel.hex   -intel -offset -0x8000 \
+			   _ceu_fat.hex -intel -offset -0x8000 \
+			   _ceu_tst.hex -intel -offset -0x8000 \
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 

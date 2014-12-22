@@ -29,8 +29,8 @@ void abort(void);
 void *malloc(size_t size);
 void *realloc(void *ptr, size_t size);
 void free(void *ptr);
-long strtol(const char * restrict nptr, char ** restrict endptr, int base);
-long long strtoll(const char * restrict nptr, char ** restrict endptr, int base);
+long strtol(const char * nptr, char ** endptr, int base);
+long long strtoll(const char * nptr, char ** endptr, int base);
 
 #endif
 

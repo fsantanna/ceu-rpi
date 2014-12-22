@@ -1,0 +1,4 @@
+native do
+    void kernel_main(void);
+end
+_kernel_main();

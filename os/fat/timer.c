@@ -40,12 +40,7 @@ struct timer_wait register_timer(useconds_t usec)
 	tw.rollover = 0;
 	tw.trigger_value = 0;
 
-	if(usec < 0)
-	{
-        //errno = EINVAL;
-		return tw;
-	}
-	uint32_t cur_timer = mmio_read(TIMER_CLO);
+    uint32_t cur_timer = mmio_read(TIMER_CLO);
 	uint32_t trig = cur_timer + (uint32_t)usec;
 
 	tw.trigger_value = trig;
