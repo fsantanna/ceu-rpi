@@ -15,15 +15,7 @@ LDFLAGS_ONE = -Wl,-T../one.ld
 # -Wl,--section-start=.text=0x10 -Wl,--section-start=.data=0x200
 #LDFLAGS_ONE = -Wl,-T../kernel.ld -Wl,--image-base
 
-all:
-	ceu led.ceu --os --verbose \
-				--out-c _ceu_led.c \
-				--cpp-exe "arm-none-eabi-cpp" \
-				--cpp-args "$(CFLAGS)"
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) _ceu_led.c -o _ceu_led.elf
-	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".got"
-	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_led.elf -O binary _ceu_led.bin
+all: one
 	$(ARMGNU)-objcopy _ceu_led.elf --change-addresses=0x110000 -O ihex _ceu_led.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
@@ -53,6 +45,16 @@ all:
 			   _ceu_led.hex -intel -offset -0x8000 \
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+one:
+	ceu led.ceu --os --verbose \
+				--out-c _ceu_led.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) _ceu_led.c -o _ceu_led.elf
+	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_led.elf -O binary _ceu_led.bin
 
 sdcard:
 	sudo mount /dev/sdb1 /mnt

@@ -23,7 +23,46 @@ CFLAGS_FAT = -pedantic -pedantic-errors \
 		 -include config.h \
 		$(CFLAGS_ONE)
 
-all:
+tst1: fat kernel
+	ceu tst1.ceu --os --verbose \
+				--out-c _ceu_tst1.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_tst1.c .
+	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		../debug.c _ceu_tst1.c -o _ceu_tst1.elf
+	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary _ceu_tst1.bin
+	$(ARMGNU)-objcopy _ceu_tst1.elf --change-addresses=0x300000 -O ihex _ceu_tst1.hex
+	###
+	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
+			   _ceu_fat.hex  -intel -offset -0x8000 \
+			   _ceu_tst1.hex -intel -offset -0x8000 \
+					-o all.hex -intel
+	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+tst2: fat kernel
+	cd ../led && make one && cd - && cp ../led/_ceu_led.bin .
+	ceu tst2.ceu --os --verbose \
+				--out-c _ceu_tst2.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_tst2.c .
+	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		../debug.c _ceu_tst2.c -o _ceu_tst2.elf
+	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_tst2.elf -O binary _ceu_tst2.bin
+	$(ARMGNU)-objcopy _ceu_tst2.elf --change-addresses=0x300000 -O ihex _ceu_tst2.hex
+	###
+	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
+			   _ceu_fat.hex  -intel -offset -0x8000 \
+			   _ceu_tst2.hex -intel -offset -0x8000 \
+					-o all.hex -intel
+	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+fat:
 	ceu fat.ceu --os --verbose \
 				--out-c _ceu_fat.c \
 				--cpp-exe "arm-none-eabi-cpp" \
@@ -58,55 +97,34 @@ all:
 		#div.c libfs.c emmc.c block.c mbr.c fat.c vfs.c timer.c mmio.c crc32.c
 		#boot.o main.c mbox.c stdlib.c malloc.c heap.c printf.c
 		#_ceu_fat.c -o _ceu_fat.elf #-lgcc
+	###
 	! $(ARMGNU)-objdump -h _ceu_fat.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_fat.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_fat.elf -O binary _ceu_fat.bin
 	$(ARMGNU)-objcopy _ceu_fat.elf --change-addresses=0x110000 -O ihex _ceu_fat.hex
-	###
-	ceu tst.ceu --os --verbose \
-				--out-c _ceu_tst.c \
-				--cpp-exe "arm-none-eabi-cpp" \
-				--cpp-args "$(CFLAGS)"
-	#cp /tmp/_ceu_tst.c .
-	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		../debug.c _ceu_tst.c -o _ceu_tst.elf
-	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
-	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
-	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x300000 -O ihex _ceu_tst.hex
-	###
+
+kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/debug.c    -o debug.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
+	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
 	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o debug.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
-	#$(ARMGNU)-gcc -g $(CFLAGS)
-				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s
-				  #$(CEUDIR)/main.c $(CEUDIR)/stdlib.c
-				  #tst.c _ceu_tst.c
-				  #-o all.o
-	#$(ARMGNU)-objdump -S -D kernel.o > /tmp/kernel.list
-	#$(ARMGNU)-ld $(LDFLAGS) kernel.o -o kernel.elf
+	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
 	$(ARMGNU)-objdump -S -D kernel.elf > kernel.list
 	$(ARMGNU)-size kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O ihex kernel.hex
-	#cp all.bin kernel.img
-	###
-	$(SRECCAT) kernel.hex   -intel -offset -0x8000 \
-			   _ceu_fat.hex -intel -offset -0x8000 \
-			   _ceu_tst.hex -intel -offset -0x8000 \
-					-o all.hex -intel
-	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 sdcard:
 	sudo mount /dev/sdb1 /mnt
 	sudo cp kernel.img /mnt/kernel.img
+	touch _ceu_led.bin
+	sudo cp _ceu_led.bin /mnt/_ceu_led.bin
 	sudo umount /mnt
 
 xmodem:
