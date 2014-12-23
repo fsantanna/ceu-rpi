@@ -439,14 +439,15 @@ FILE *fopen(const char *path, const char *mode)
 		return (void *)0;
 	}
 
-	if((NULL == p[0]) || (!strcmp(p[0], ":")))
+    if((NULL == p[0]) || (!strcmp(p[0], ":")))
 	{
 		free_split_dir(p);
 
 		// These represent attempts to open the whole device as a single file
 		// We can only do this if the filesystem allows it
-		if(ve->fs->flags & FS_FLAG_SUPPORTS_EMPTY_FNAME)
-			return ve->fs->fopen(ve->fs, NULL, mode);
+        if(ve->fs->flags & FS_FLAG_SUPPORTS_EMPTY_FNAME) {
+            return ve->fs->fopen(ve->fs, NULL, mode);
+        }
 		else
 		{
 			errno = EFAULT;

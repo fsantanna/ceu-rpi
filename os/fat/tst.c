@@ -4,7 +4,7 @@
 void MAIN (void)
 {
     tceu_app* fat = ceu_sys_load((void*)0x110000);
-    //tceu_app* tst         = ceu_sys_load((void*)0x210000);
+    //tceu_app* tst         = ceu_sys_load((void*)0x310000);
     assert(fat != NULL);
     //assert(tst         != NULL);
 

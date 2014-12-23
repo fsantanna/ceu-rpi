@@ -17,10 +17,9 @@ LDFLAGS_ONE = -Wl,-T../one.ld
 
 CFLAGS_FAT = -pedantic -pedantic-errors \
 		 -nostdlib -nostartfiles -ffreestanding \
-		 -Wall -Wextra -Werror -Wshadow \
+		 -Wall -Wextra -Wshadow \
 		 -std=gnu99 \
 		 -I. -DBUILDING_RPIBOOT \
-		 -O3 \
 		 -include config.h \
 		$(CFLAGS_ONE)
 
@@ -48,11 +47,13 @@ all:
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c stdlib.c -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c heap.c -o heap.o
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c printf.c -o printf.o
+	#$(ARMGNU)-gcc $(CFLAGS_FAT) -c uart.c -o uart.o
 	# all
 	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		div.o libfs.o emmc.o block.o mbr.o fat.o vfs.o timer.o mmio.o boot.o \
 		mbox.o stdlib.o heap.o malloc.o printf.o main.o \
 		_ceu_fat.c -o _ceu_fat.elf -lgcc
+		# uart.o
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_FAT) $(LDFLAGS_ONE)
 		#div.c libfs.c emmc.c block.c mbr.c fat.c vfs.c timer.c mmio.c crc32.c
 		#boot.o main.c mbox.c stdlib.c malloc.c heap.c printf.c
@@ -72,7 +73,7 @@ all:
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
-	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x210000 -O ihex _ceu_tst.hex
+	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x310000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
@@ -99,14 +100,18 @@ all:
 	###
 	$(SRECCAT) kernel.hex   -intel -offset -0x8000 \
 			   _ceu_fat.hex -intel -offset -0x8000 \
-			   _ceu_tst.hex -intel -offset -0x8000 \
 					-o all.hex -intel
+			   #_ceu_tst.hex -intel -offset -0x8000
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 sdcard:
 	sudo mount /dev/sdb1 /mnt
 	sudo cp kernel.img /mnt/kernel.img
 	sudo umount /mnt
+
+xmodem:
+	stty -F /dev/ttyUSB0 115200
+	sx -vv kernel.img < /dev/ttyUSB0 > /dev/ttyUSB0
 
 clean:
 	find . -name "*.exe"  | xargs rm -f

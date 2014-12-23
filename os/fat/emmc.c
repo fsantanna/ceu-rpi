@@ -1437,7 +1437,7 @@ int sd_card_init(struct block_device **dev)
 
     assert(ret);
 
-	memset(ret, 0, sizeof(struct emmc_block_dev));
+    memset(ret, 0, sizeof(struct emmc_block_dev));
     ret->bd.driver_name = driver_name;
 	ret->bd.device_name = device_name;
 	ret->bd.block_size = 512;

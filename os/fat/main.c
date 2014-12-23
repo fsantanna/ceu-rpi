@@ -21,11 +21,15 @@
 
 #include <stdlib.h>
 #include "vfs.h"
+//#include "uart.h"
 
 void libfs_init();
 
 void kernel_main(void)
 {
+    //uart_init();
+    //for (volatile int i=0; i<0x110A; i++);
+
     // Register the various file systems
 	libfs_init();
 
@@ -34,17 +38,19 @@ void kernel_main(void)
 
     // Default device
     FILE *f = fopen("/boot/rpi-boot.cfg", "r");
-    {
-		long flen = fsize(f);
-        char *buf = (char *)malloc(flen+1);
+    if (f != NULL) {
+        long flen = fsize(f);
+        //char *buf = (char *)malloc(flen+1);
+        char buf[255];
 		buf[flen] = 0;		// null terminate
-		fread(buf, 1, flen, f);
-		fclose(f);
+        fread(buf, 1, flen, f);
+        fclose(f);
         if (buf[0]=='m' &&
             buf[1]=='u' &&
             buf[2]=='l' &&
             buf[3]=='t' &&
             buf[4]=='i') {
+            {
                 #define GPFSEL1 ((unsigned int*)0x20200004)
                 #define GPSET0  ((unsigned int*)0x2020001C)
                 #define GPCLR0  ((unsigned int*)0x20200028)
@@ -55,6 +61,7 @@ void kernel_main(void)
                 *GPFSEL1 = ra;
                 *GPCLR0 = 1<<16;   // GPIO16 on
                 while(1);
+            }
         }
     }
 }

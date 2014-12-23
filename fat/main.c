@@ -34,7 +34,7 @@ void kernel_main(void)
 
     // Default device
     FILE *f = fopen("/boot/rpi-boot.cfg", "r");
-    {
+    if (f != NULL) {
 		long flen = fsize(f);
         char *buf = (char *)malloc(flen+1);
 		buf[flen] = 0;		// null terminate
@@ -45,16 +45,18 @@ void kernel_main(void)
             buf[2]=='l' &&
             buf[3]=='t' &&
             buf[4]=='i') {
-#define GPFSEL1 ((unsigned int*)0x20200004)
-#define GPSET0  ((unsigned int*)0x2020001C)
-#define GPCLR0  ((unsigned int*)0x20200028)
-unsigned int ra;
-ra = *GPFSEL1;
-ra = ra & ~(7<<18);
-ra = ra | 1<<18;
-*GPFSEL1 = ra;
-*GPCLR0 = 1<<16;   // GPIO16 on
-while(1);
+            {
+                #define GPFSEL1 ((unsigned int*)0x20200004)
+                #define GPSET0  ((unsigned int*)0x2020001C)
+                #define GPCLR0  ((unsigned int*)0x20200028)
+                unsigned int ra;
+                ra = *GPFSEL1;
+                ra = ra & ~(7<<18);
+                ra = ra | 1<<18;
+                *GPFSEL1 = ra;
+                *GPCLR0 = 1<<16;   // GPIO16 on
+                while(1);
+            }
         }
     }
 }
