@@ -40,7 +40,7 @@ all:
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c mmio.c -o mmio.o
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c crc32.c -o crc32.o
 	# fat
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c main.c -o main.o
+	#$(ARMGNU)-gcc $(CFLAGS_FAT) -c main.c -o main.o
 	$(ARMGNU)-gcc $(SFLAGS_FAT) -Wa,-mcpu=arm1176jzf-s -c boot.s -o boot.o
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c mbox.c -o mbox.o
 	$(ARMGNU)-gcc $(CFLAGS_FAT) -c malloc.c -o malloc.o
@@ -51,9 +51,9 @@ all:
 	# all
 	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		div.o libfs.o emmc.o block.o mbr.o fat.o vfs.o timer.o mmio.o boot.o \
-		mbox.o stdlib.o heap.o malloc.o printf.o main.o \
+		mbox.o stdlib.o heap.o malloc.o printf.o \
 		_ceu_fat.c -o _ceu_fat.elf -lgcc
-		# uart.o
+		# main.o uart.o
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_FAT) $(LDFLAGS_ONE)
 		#div.c libfs.c emmc.c block.c mbr.c fat.c vfs.c timer.c mmio.c crc32.c
 		#boot.o main.c mbox.c stdlib.c malloc.c heap.c printf.c
@@ -68,12 +68,12 @@ all:
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst.c .
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		../debug.c _ceu_tst.c -o _ceu_tst.elf
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
-	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x310000 -O ihex _ceu_tst.hex
+	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x300000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
@@ -100,8 +100,8 @@ all:
 	###
 	$(SRECCAT) kernel.hex   -intel -offset -0x8000 \
 			   _ceu_fat.hex -intel -offset -0x8000 \
+			   _ceu_tst.hex -intel -offset -0x8000 \
 					-o all.hex -intel
-			   #_ceu_tst.hex -intel -offset -0x8000
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 sdcard:

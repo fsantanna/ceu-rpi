@@ -1,4 +1,4 @@
-#include "uart.h"
+//#include "uart.h"
 
 void
 printf(char *fmt, ...)
