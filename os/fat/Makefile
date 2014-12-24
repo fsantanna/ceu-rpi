@@ -30,7 +30,7 @@ tst1: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst1.c .
 	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		../debug.c _ceu_tst1.c -o _ceu_tst1.elf
+		_ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary tst1.app
@@ -50,7 +50,7 @@ tst2: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst2.c .
 	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		../debug.c _ceu_tst2.c -o _ceu_tst2.elf
+		_ceu_tst2.c -o _ceu_tst2.elf
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst2.elf -O binary tst2.app
@@ -71,8 +71,8 @@ tst3: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst3.c .
-	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		../debug.c _ceu_tst3.c -o _ceu_tst3.elf
+	$(ARMGNU)-gcc -I. -Ilib/ $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		_ceu_tst3.c -o _ceu_tst3.elf
 	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst3.elf -O binary tst3.app
@@ -90,31 +90,30 @@ fat:
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	# libfs
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c div.c -o div.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c libfs.c -o libfs.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c emmc.c -o emmc.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c block.c -o block.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c mbr.c -o mbr.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c fat.c -o fat.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c vfs.c -o vfs.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c timer.c -o timer.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c mmio.c -o mmio.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c crc32.c -o crc32.o
-	# fat
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/libfs.c -o lib/libfs.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/emmc.c -o lib/emmc.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/block.c -o lib/block.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/mbr.c -o lib/mbr.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/fat.c -o lib/fat.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/vfs.c -o lib/vfs.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/timer.c -o lib/timer.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/mmio.c -o lib/mmio.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/crc32.c -o lib/crc32.o
+	$(ARMGNU)-gcc $(SFLAGS_FAT) -Wa,-mcpu=arm1176jzf-s -Ilib/ -c lib/boot.s -o lib/boot.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/mbox.c -o lib/mbox.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/malloc.c -o lib/malloc.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/stdlib.c -o lib/stdlib.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/heap.c -o lib/heap.o
+	$(ARMGNU)-gcc $(CFLAGS_FAT) -Ilib/ -c lib/printf.c -o lib/printf.o
 	#$(ARMGNU)-gcc $(CFLAGS_FAT) -c main.c -o main.o
-	$(ARMGNU)-gcc $(SFLAGS_FAT) -Wa,-mcpu=arm1176jzf-s -c boot.s -o boot.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c mbox.c -o mbox.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c malloc.c -o malloc.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c stdlib.c -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c heap.c -o heap.o
-	$(ARMGNU)-gcc $(CFLAGS_FAT) -c printf.c -o printf.o
-	#$(ARMGNU)-gcc $(CFLAGS_FAT) -c uart.c -o uart.o
+	$(ARMGNU)-ar rcs libfat.a \
+		lib/libfs.o lib/emmc.o lib/block.o lib/mbr.o lib/fat.o lib/vfs.o \
+		lib/timer.o lib/mmio.o lib/boot.o lib/mbox.o lib/stdlib.o lib/heap.o \
+		lib/div.o lib/malloc.o lib/printf.o
 	# all
-	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		div.o libfs.o emmc.o block.o mbr.o fat.o vfs.o timer.o mmio.o boot.o \
-		mbox.o stdlib.o heap.o malloc.o printf.o \
-		_ceu_fat.c -o _ceu_fat.elf -lgcc
-		# main.o uart.o
+	$(ARMGNU)-gcc -I. -Ilib/ $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		_ceu_fat.c -o _ceu_fat.elf -L. -lfat -lgcc
+		# main.o
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_FAT) $(LDFLAGS_ONE)
 		#div.c libfs.c emmc.c block.c mbr.c fat.c vfs.c timer.c mmio.c crc32.c
 		#boot.o main.c mbox.c stdlib.c malloc.c heap.c printf.c
@@ -129,11 +128,11 @@ kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/debug.c    -o debug.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/puts.c     -o puts.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o debug.o ceu_os.o app.o main.o \
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o puts.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
