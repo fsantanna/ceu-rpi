@@ -1,0 +1,31 @@
+native/pre do
+    ##include "lua.h"
+end
+
+native @nohold _ceu_out_log();
+
+output (void)=>_lua_State* LUA_NEW;
+output (_lua_State* l, _lua_Number v)=>void LUA_PUSHNUMBER;
+output (_lua_State* l, int index)=>int LUA_TONUMBER;
+
+var _lua_State* l = (call LUA_NEW);
+call LUA_PUSHNUMBER => (l, 10);
+var int v = (call LUA_TONUMBER => (l, -1));
+
+await 1s;
+    //_ceu_out_log("OK!!!\n");
+
+if v == 10 then
+    //_ceu_out_log("OK!!!\n");
+    #define GPFSEL1 ((uint*)0x20200004)
+    #define GPSET0  ((uint*)0x2020001C)
+    #define GPCLR0  ((uint*)0x20200028)
+    var uint ra;
+    ra = *GPFSEL1;
+    ra = ra & ~(7<<18);
+    ra = ra | 1<<18;
+    *GPFSEL1 = ra;
+    *GPCLR0 = 1<<16;   // GPIO16 on
+    _ceu_out_assert(0);
+end
+

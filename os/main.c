@@ -1,4 +1,3 @@
-#include <debug.h>
 #include "ceu_os.h"
 
 extern void MAIN (void);

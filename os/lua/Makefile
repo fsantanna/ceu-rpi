@@ -30,11 +30,12 @@ tst1: lua kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst1.c .
 	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		../debug.c _ceu_tst1.c -o _ceu_tst1.elf
+		-I lua-5.1.5/src/ \
+		_ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary tst1.app
-	$(ARMGNU)-objcopy _ceu_tst1.elf --change-addresses=0x300000 -O ihex _ceu_tst1.hex
+	$(ARMGNU)-objcopy _ceu_tst1.elf --change-addresses=0x150000 -O ihex _ceu_tst1.hex
 	###
 	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
 			   _ceu_lua.hex  -intel -offset -0x8000 \
@@ -61,11 +62,11 @@ kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/debug.c    -o debug.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/puts.c     -o puts.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o debug.o ceu_os.o app.o main.o \
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o puts.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"

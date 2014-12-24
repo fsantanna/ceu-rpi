@@ -1,26 +1,47 @@
-native do
+native/pre do
     ##include "lua.h"
+end
 
+native do
     static void* l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
        (void)osize;  /* not used */
        tceu_app* _ceu_app = (tceu_app*) ud;
-       if (nsize == 0) {
-         ceu_out_free(ptr);
-         return NULL;
-       }
-       else {
-         // TODO realloc
-         //return realloc(ptr, nsize);
-         return ceu_out_malloc(nsize);
-       }
-       return NULL;
+       return ceu_out_realloc(ptr, nsize);
      }
 end
 
 // TODO
 native @pure _lua_newstate(), _lua_pushnumber(), _lua_tonumber();
+native @nohold _ceu_out_log();
 
-var _lua_State* l = _lua_newstate(_l_alloc, __ceu_app);
+input (void)=>_lua_State* NEW do
+    return _lua_newstate(_l_alloc, __ceu_app);
+end
+
+input (_lua_State* l, _lua_Number v)=>void PUSHNUMBER do
+    _lua_pushnumber(l, v);
+end
+
+input (_lua_State* l, int index)=>int TONUMBER do
+    return _lua_tonumber(l, index);
+end
+
+/*
+    #define GPFSEL1 ((uint*)0x20200004)
+    #define GPSET0  ((uint*)0x2020001C)
+    #define GPCLR0  ((uint*)0x20200028)
+    var uint ra;
+    ra = *GPFSEL1;
+    ra = ra & ~(7<<18);
+    ra = ra | 1<<18;
+    *GPFSEL1 = ra;
+    *GPCLR0 = 1<<16;   // GPIO16 on
+*/
+
+await 1s;
+    //_ceu_out_log("LUA!!!\n");
+
+/*
 _lua_pushnumber(l, 10);
 var int v = _lua_tonumber(l, -1);
 
@@ -35,5 +56,6 @@ if v == 10 then
                 *GPFSEL1 = ra;
                 *GPCLR0 = 1<<16;   // GPIO16 on
 end
+*/
 
 await FOREVER;

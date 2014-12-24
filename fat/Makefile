@@ -11,6 +11,7 @@ CFLAGS = -pedantic -pedantic-errors \
 		 -include config.h
 
 all: libfs.a
+	$(GCC) $(CFLAGS) -c uart.c -o uart.o
 	$(GCC) $(CFLAGS) -c main.c -o main.o
 	$(GCC) -Wa,-mcpu=arm1176jzf-s -include config.h -c boot.s -o boot.o
 	$(GCC) $(CFLAGS) -c mbox.c -o mbox.o
@@ -18,7 +19,7 @@ all: libfs.a
 	$(GCC) $(CFLAGS) -c stdlib.c -o stdlib.o
 	$(GCC) $(CFLAGS) -c heap.c -o heap.o
 	$(GCC) $(CFLAGS) -c printf.c -o printf.o
-	$(GCC) $(CFLAGS) main.o boot.o mbox.o stdlib.o heap.o malloc.o printf.o \
+	$(GCC) $(CFLAGS) uart.o main.o boot.o mbox.o stdlib.o heap.o malloc.o printf.o \
 		-Wl,-T,linker.ld -o kernel.elf -lgcc -L. -lfs
 	$(OBJCOPY) kernel.elf -O binary kernel.img
 

@@ -21,11 +21,16 @@
 
 #include <stdlib.h>
 #include "vfs.h"
+#include "uart.h"
 
 void libfs_init();
 
 void kernel_main(void)
 {
+uart_init();
+    for(volatile int i=0; i<0x110A; i++);
+uart_puts("init\n");
+
     // Register the various file systems
 	libfs_init();
 
@@ -34,7 +39,12 @@ void kernel_main(void)
 
     // Default device
     FILE *f = fopen("/boot/rpi-boot.cfg", "r");
-    if (f != NULL) {
+uart_puts("f :");
+hexstring((unsigned int)f);
+    FILE *f2 = fopen("_ceu_led.bin", "r");
+uart_puts("f2 :");
+hexstring((unsigned int)f2);
+    if (f2 != NULL) {
 		long flen = fsize(f);
         char *buf = (char *)malloc(flen+1);
 		buf[flen] = 0;		// null terminate

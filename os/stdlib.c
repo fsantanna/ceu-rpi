@@ -4,21 +4,27 @@
 static char   MEM_buf[MEM_TOTAL] = {0};   /* {0} avoids .bss */
 static size_t MEM_i = 0;
 
-void* malloc (size_t size) {
-    size_t nxt = MEM_i + size;
-    int mod = nxt % 4;  // TODO: 4 hardcoded
-    if (mod) {
-        nxt = nxt + (4 - mod);
-    }
-    if (nxt <= MEM_TOTAL) {
-        void* ret = &MEM_buf[MEM_i];
-        MEM_i = nxt;
-        return ret;
+void* realloc (void* ptr, size_t size) {
+    if (size > 0) {
+        // TODO: realloc
+        size_t nxt = MEM_i + size;
+        int mod = nxt % 4;  // TODO: 4 hardcoded
+        if (mod) {
+            nxt = nxt + (4 - mod);
+        }
+        if (nxt <= MEM_TOTAL) {
+            void* ret = &MEM_buf[MEM_i];
+            MEM_i = nxt;
+            return ret;
+        } else {
+            return NULL;
+        }
     } else {
+        if (ptr != NULL) {
+            // TODO: free
+        }
         return NULL;
     }
-}
-void free (void* ptr) {
 }
 
 void* memset (void* s, int c, size_t n) {
