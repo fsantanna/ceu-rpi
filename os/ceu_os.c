@@ -739,6 +739,7 @@ int ceu_go_all (tceu_app* app)
  */
 void* CEU_SYS_VEC[CEU_SYS_MAX] __attribute__((used)) = {
     (void*) &ceu_sys_assert,
+    (void*) &ceu_sys_log,
     (void*) &ceu_sys_realloc,
     (void*) &ceu_sys_req,
     (void*) &ceu_sys_load,

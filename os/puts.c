@@ -43,8 +43,6 @@ static void puts_init (void) {
     *GPPUDCLK0 = 0;
 
     *AUX_MU_CNTL_REG = 3;
-
-    while(i++ < 9999999);
 }
 
 void puts (char* s) {
