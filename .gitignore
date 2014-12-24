@@ -3,6 +3,7 @@
 *.list
 *.hex
 *.bin
+*.app
 *.o
 .*.swp
 .*.swo

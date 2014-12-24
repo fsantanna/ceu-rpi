@@ -26,7 +26,7 @@ all:
 		csud.c keyboard.c _ceu_keyboard.c -o _ceu_keyboard.elf
 	! $(ARMGNU)-objdump -h _ceu_keyboard.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_keyboard.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_keyboard.elf -O binary _ceu_keyboard.bin
+	$(ARMGNU)-objcopy _ceu_keyboard.elf -O binary keyboard.app
 	$(ARMGNU)-objcopy _ceu_keyboard.elf --change-addresses=0x113000 -O ihex _ceu_keyboard.hex
 	###
 	ceu tst.ceu --os --verbose \
@@ -38,7 +38,7 @@ all:
 		../debug.c _ceu_tst.c -o _ceu_tst.elf
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
+	$(ARMGNU)-objcopy _ceu_tst.elf -O binary tst.app
 	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x128000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
@@ -82,5 +82,5 @@ clean:
 	find . -name "*.hex"  | xargs rm -f
 	find . -name "*.o"    | xargs rm -f
 	find . -name "*.elf"  | xargs rm -f
-	find . -name "*.bin"  | xargs rm -f
+	find . -name "*.app"  | xargs rm -f
 	find . -name "*.list" | xargs rm -f

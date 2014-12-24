@@ -1,0 +1,127 @@
+native do
+    ##include "vfs.h"
+end
+
+native @pure _ceu_out_load(), _ceu_out_start(), _ceu_out_link();
+
+output (char* path, char* mode)=>_FILE* OPEN;
+output (_FILE* f)=>int CLOSE;
+output (_FILE* f)=>int SIZE;
+output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
+
+// LED
+
+var char[5000] buf_led;
+do
+    var _FILE[] f;
+    //finalize
+        f = (call OPEN => ("led.app", "r"));
+    //finalize
+    //with
+        //call CLOSE => f;
+    //end
+
+    if f == null then
+        await FOREVER;
+    end
+
+    var int flen = (call SIZE => f);
+    /*
+    var char* buf;
+    finalize
+        buf = (char *)_malloc(flen);
+    with
+        nothing;    // TODO
+    end
+    */
+    call READ => (buf_led, 1, flen, f);
+
+    var _tceu_app[] led;
+    //finalize
+        led = _ceu_out_load(buf_led);
+    //with
+        //nothing;    // TODO
+    //end
+    _ceu_out_start(led);
+    // TODO: unload?
+end
+
+// UART
+
+var _tceu_app[] uart;
+var char[5000] buf_uart;
+do
+    var _FILE[] f;
+    //finalize
+        f = (call OPEN => ("uart.app", "r"));
+    //finalize
+    //with
+        //call CLOSE => f;
+    //end
+
+    if f == null then
+        await FOREVER;
+    end
+
+    var int flen = (call SIZE => f);
+    /*
+    var char* buf;
+    finalize
+        buf = (char *)_malloc(flen);
+    with
+        nothing;    // TODO
+    end
+    */
+    call READ => (buf_uart, 1, flen, f);
+
+    //finalize
+        uart = _ceu_out_load(buf_uart);
+    //with
+        //nothing;    // TODO
+    //end
+    // TODO: unload?
+end
+
+// UART_TST
+var _tceu_app[] uart_tst;
+var char[5000] buf_uart_tst;
+do
+    var _FILE[] f;
+    //finalize
+        f = (call OPEN => ("uart_tst.app", "r"));
+    //finalize
+    //with
+        //call CLOSE => f;
+    //end
+
+    if f == null then
+        await FOREVER;
+    end
+
+    var int flen = (call SIZE => f);
+    /*
+    var char* buf;
+    finalize
+        buf = (char *)_malloc(flen);
+    with
+        nothing;    // TODO
+    end
+    */
+    call READ => (buf_uart_tst, 1, flen, f);
+
+    //finalize
+        uart_tst = _ceu_out_load(buf_uart_tst);
+    //with
+        //nothing;    // TODO
+    //end
+    // TODO: unload?
+end
+
+_ceu_out_link( uart_tst,1   ,  uart,243 );
+    //finalize with nothing; end;
+_ceu_out_link( uart,1       ,  uart_tst,243 );
+    //finalize with nothing; end;
+_ceu_out_start(uart);
+_ceu_out_start(uart_tst);
+
+await FOREVER;

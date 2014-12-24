@@ -33,7 +33,7 @@ tst1: fat kernel
 		../debug.c _ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary _ceu_tst1.bin
+	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary tst1.app
 	$(ARMGNU)-objcopy _ceu_tst1.elf --change-addresses=0x300000 -O ihex _ceu_tst1.hex
 	###
 	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
@@ -43,7 +43,7 @@ tst1: fat kernel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 tst2: fat kernel
-	cd ../led && make one && cd - && cp ../led/_ceu_led.bin .
+	cd ../led && make led && cd - && cp ../led/led.app .
 	ceu tst2.ceu --os --verbose \
 				--out-c _ceu_tst2.c \
 				--cpp-exe "arm-none-eabi-cpp" \
@@ -53,12 +53,34 @@ tst2: fat kernel
 		../debug.c _ceu_tst2.c -o _ceu_tst2.elf
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_tst2.elf -O binary _ceu_tst2.bin
+	$(ARMGNU)-objcopy _ceu_tst2.elf -O binary tst2.app
 	$(ARMGNU)-objcopy _ceu_tst2.elf --change-addresses=0x300000 -O ihex _ceu_tst2.hex
 	###
 	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
 			   _ceu_fat.hex  -intel -offset -0x8000 \
 			   _ceu_tst2.hex -intel -offset -0x8000 \
+					-o all.hex -intel
+	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+tst3: fat kernel
+	cd ../led  && make led  && cd - && cp ../led/led.app .
+	cd ../uart && make uart && cd - && cp ../uart/uart.app .
+	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
+	ceu tst3.ceu --os --verbose \
+				--out-c _ceu_tst3.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_tst3.c .
+	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		../debug.c _ceu_tst3.c -o _ceu_tst3.elf
+	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_tst3.elf -O binary tst3.app
+	$(ARMGNU)-objcopy _ceu_tst3.elf --change-addresses=0x300000 -O ihex _ceu_tst3.hex
+	###
+	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
+			   _ceu_fat.hex  -intel -offset -0x8000 \
+			   _ceu_tst3.hex -intel -offset -0x8000 \
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
@@ -100,7 +122,7 @@ fat:
 	###
 	! $(ARMGNU)-objdump -h _ceu_fat.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_fat.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_fat.elf -O binary _ceu_fat.bin
+	$(ARMGNU)-objcopy _ceu_fat.elf -O binary fat.app
 	$(ARMGNU)-objcopy _ceu_fat.elf --change-addresses=0x110000 -O ihex _ceu_fat.hex
 
 kernel:
@@ -123,8 +145,8 @@ kernel:
 sdcard:
 	sudo mount /dev/sdb1 /mnt
 	sudo cp kernel.img /mnt/kernel.img
-	touch _ceu_led.bin
-	sudo cp _ceu_led.bin /mnt/_ceu_led.bin
+	touch led.app uart.app uart_tst.app
+	sudo cp *.app /mnt/
 	sudo umount /mnt
 
 xmodem:
@@ -137,5 +159,5 @@ clean:
 	find . -name "*.hex"  | xargs rm -f
 	find . -name "*.o"    | xargs rm -f
 	find . -name "*.elf"  | xargs rm -f
-	find . -name "*.bin"  | xargs rm -f
+	find . -name "*.app"  | xargs rm -f
 	find . -name "*.list" | xargs rm -f

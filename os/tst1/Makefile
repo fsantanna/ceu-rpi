@@ -19,7 +19,7 @@ all:
 	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) ceu_tst.c -o ceu_tst.elf
 	! $(ARMGNU)-objdump -h ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h ceu_tst.elf | grep ".bss"
-	$(ARMGNU)-objcopy ceu_tst.elf -O binary ceu_tst.bin
+	$(ARMGNU)-objcopy ceu_tst.elf -O binary tst.app
 	$(ARMGNU)-objcopy ceu_tst.elf --change-addresses=0x110000 -O ihex ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
@@ -59,5 +59,5 @@ clean:
 	find . -name "*.hex"  | xargs rm -f
 	find . -name "*.o"    | xargs rm -f
 	find . -name "*.elf"  | xargs rm -f
-	find . -name "*.bin"  | xargs rm -f
+	find . -name "*.app"  | xargs rm -f
 	find . -name "*.list" | xargs rm -f

@@ -10,7 +10,7 @@ output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
 // Default device
 var _FILE[] f;
 //finalize
-    f = (call OPEN => ("_ceu_led.bin", "r"));
+    f = (call OPEN => ("led.app", "r"));
 finalize
 with
     call CLOSE => f;

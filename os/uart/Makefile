@@ -13,29 +13,8 @@ CFLAGS += -fno-zero-initialized-in-bss
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 LDFLAGS_ONE = -Wl,-T../one.ld
 
-all:
-	ceu uart.ceu --os --verbose \
-				--out-c _ceu_uart.c \
-				--cpp-exe "arm-none-eabi-cpp" \
-				--cpp-args "$(CFLAGS)"
-	#cp /tmp/_ceu_uart.c .
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		_ceu_uart.c -o _ceu_uart.elf
-	! $(ARMGNU)-objdump -h _ceu_uart.elf | grep ".got"
-	! $(ARMGNU)-objdump -h _ceu_uart.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_uart.elf -O binary _ceu_uart.bin
+all: uart tst
 	$(ARMGNU)-objcopy _ceu_uart.elf --change-addresses=0x110000 -O ihex _ceu_uart.hex
-	###
-	ceu tst.ceu --os --verbose \
-				--out-c _ceu_tst.c \
-				--cpp-exe "arm-none-eabi-cpp" \
-				--cpp-args "$(CFLAGS)"
-	#cp /tmp/_ceu_tst.c .
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		_ceu_tst.c -o _ceu_tst.elf
-	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
-	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_tst.elf -O binary _ceu_tst.bin
 	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x112000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
@@ -67,6 +46,30 @@ all:
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
+uart:
+	ceu uart.ceu --os --verbose \
+				--out-c _ceu_uart.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_uart.c .
+	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		_ceu_uart.c -o _ceu_uart.elf
+	! $(ARMGNU)-objdump -h _ceu_uart.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_uart.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_uart.elf -O binary uart.app
+
+tst:
+	ceu tst.ceu --os --verbose \
+				--out-c _ceu_tst.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_tst.c .
+	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		_ceu_tst.c -o _ceu_tst.elf
+	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_tst.elf -O binary tst.app
+
 sdcard:
 	sudo mount /dev/sdb1 /mnt
 	sudo cp kernel.img /mnt/kernel.img
@@ -78,5 +81,5 @@ clean:
 	find . -name "*.hex"  | xargs rm -f
 	find . -name "*.o"    | xargs rm -f
 	find . -name "*.elf"  | xargs rm -f
-	find . -name "*.bin"  | xargs rm -f
+	find . -name "*.app"  | xargs rm -f
 	find . -name "*.list" | xargs rm -f

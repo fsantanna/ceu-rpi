@@ -6,6 +6,10 @@ static size_t MEM_i = 0;
 
 void* malloc (size_t size) {
     size_t nxt = MEM_i + size;
+    int mod = nxt % 4;  // TODO: 4 hardcoded
+    if (mod) {
+        nxt = nxt + (4 - mod);
+    }
     if (nxt <= MEM_TOTAL) {
         void* ret = &MEM_buf[MEM_i];
         MEM_i = nxt;

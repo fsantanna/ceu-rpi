@@ -15,7 +15,7 @@ LDFLAGS_ONE = -Wl,-T../one.ld
 # -Wl,--section-start=.text=0x10 -Wl,--section-start=.data=0x200
 #LDFLAGS_ONE = -Wl,-T../kernel.ld -Wl,--image-base
 
-all: one
+all: led
 	$(ARMGNU)-objcopy _ceu_led.elf --change-addresses=0x110000 -O ihex _ceu_led.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
@@ -46,7 +46,7 @@ all: one
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
-one:
+led:
 	ceu led.ceu --os --verbose \
 				--out-c _ceu_led.c \
 				--cpp-exe "arm-none-eabi-cpp" \
@@ -54,7 +54,7 @@ one:
 	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) _ceu_led.c -o _ceu_led.elf
 	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_led.elf -O binary _ceu_led.bin
+	$(ARMGNU)-objcopy _ceu_led.elf -O binary led.app
 
 sdcard:
 	sudo mount /dev/sdb1 /mnt
@@ -67,5 +67,5 @@ clean:
 	find . -name "*.hex"  | xargs rm -f
 	find . -name "*.o"    | xargs rm -f
 	find . -name "*.elf"  | xargs rm -f
-	find . -name "*.bin"  | xargs rm -f
+	find . -name "*.app"  | xargs rm -f
 	find . -name "*.list" | xargs rm -f
