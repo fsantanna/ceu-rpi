@@ -7,14 +7,16 @@
 # Your platform. See PLATS for possible values.
 PLAT= none
 
-CC= gcc
+CC= arm-none-eabi-gcc
 CFLAGS= -O2 -Wall $(MYCFLAGS)
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
 LIBS= -lm $(MYLIBS)
 
-MYCFLAGS=
+CFLAGS += -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -fno-zero-initialized-in-bss
+CFLAGS += -fpic
 MYLDFLAGS=
 MYLIBS=
 
@@ -26,14 +28,15 @@ LUA_A=	liblua.a
 CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
 	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
 	lundump.o lvm.o lzio.o
-LIB_O=	lauxlib.o lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o \
-	lstrlib.o loadlib.o linit.o
+LIB_O=
+	#lauxlib.o lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o
+	#lstrlib.o loadlib.o linit.o
 
-LUA_T=	lua
-LUA_O=	lua.o
+LUA_T=	#lua
+LUA_O=	#lua.o
 
-LUAC_T=	luac
-LUAC_O=	luac.o print.o
+LUAC_T=	#luac
+LUAC_O=	#luac.o print.o
 
 ALL_O= $(CORE_O) $(LIB_O) $(LUA_O) $(LUAC_O)
 ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T)
