@@ -49,13 +49,6 @@ input (_lua_State* l, int index)=>char* TOSTRING do
 end
 
 input (_lua_State* l, char* str)=>int L_DOSTRING do
-    _ceu_out_log(0, "\n");
-    _ceu_out_log(0, "L_DOSTRING // ");
-    _ceu_out_log(0, "L=");
-    _ceu_out_log(1, l);
-    _ceu_out_log(0, " str=");
-    _ceu_out_log(1, str);
-    _ceu_out_log(0, "\n");
     var int ret = _luaL_dostring(l, str);
     if ret then
         _ceu_out_log(0, "NO\n");

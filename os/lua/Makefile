@@ -4,8 +4,9 @@ CEUDIR = /data/ceu/ceu-rpi/os
 
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
-CFLAGS += -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nodefaultlibs -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
+CFLAGS += -nostdinc -isystem ../musl/include
 #CFLAGS += -fpic -mpic-data-is-text-relative
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
@@ -16,7 +17,7 @@ CFLAGS_ONE += -fno-zero-initialized-in-bss
 LDFLAGS_ONE = -Wl,-T../one.ld
 
 CFLAGS_FAT = -pedantic -pedantic-errors \
-		 -nostdlib -nostartfiles -ffreestanding \
+		 -nostartfiles -ffreestanding \
 		 -Wall -Wextra -Wshadow \
 		 -std=gnu99 \
 		 -I. -DBUILDING_RPIBOOT \
@@ -51,10 +52,13 @@ lua:
 				--cpp-args "$(CFLAGS)"
 	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		-I lua-5.1.5/src/ \
-		other.c _ceu_lua.c -o _ceu_lua.elf -L lua-5.1.5/src -llua -lm -lc -lgcc
+		other.c _ceu_lua.c -o _ceu_lua.elf \
+		-L ../musl/lib -L lua-5.1.5/src -llua -lc -lgcc
 	###
+	# TODO: got & bss
 	#! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".got"
 	#! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".bss"
+	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	$(ARMGNU)-objcopy _ceu_lua.elf -O binary lua.app
 	$(ARMGNU)-objcopy _ceu_lua.elf --change-addresses=0x110000 -O ihex _ceu_lua.hex
 
@@ -62,11 +66,11 @@ kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/puts.c     -o puts.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o puts.o ceu_os.o app.o main.o \
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_log.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
