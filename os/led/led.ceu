@@ -11,10 +11,10 @@ ra = ra | 1<<18;
 *GPFSEL1 = ra;
 
 loop do
-    _ceu_out_log("on\n");
+    _ceu_out_log(0, "on\n");
     *GPCLR0 = 1<<16;
     await 2s;
-    _ceu_out_log("off\n");
+    _ceu_out_log(0, "off\n");
     *GPSET0 = 1<<16;
     await 1s;
 end

@@ -68,8 +68,12 @@ void ceu_sys_assert (int v) {
 #endif
 }
 
-void ceu_sys_log (char* s) {
-    puts(s);
+void ceu_sys_log (int mode, char* s) {
+#ifdef CEU_OS
+    ceu_log(mode, s);
+#else
+#error not implemented
+#endif
 }
 
 #if defined(CEU_NEWS) || defined(CEU_THREADS) || defined(CEU_OS)

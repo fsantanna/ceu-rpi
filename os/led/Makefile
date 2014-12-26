@@ -19,13 +19,13 @@ all: led
 	$(ARMGNU)-objcopy _ceu_led.elf --change-addresses=0x110000 -O ihex _ceu_led.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/puts.c     -o puts.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -include $(CEUDIR)/puts.h -c $(CEUDIR)/ceu_os.c -o ceu_os.o
+	$(ARMGNU)-gcc $(CFLAGS) -include $(CEUDIR)/ceu_log.h -c $(CEUDIR)/ceu_os.c -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o puts.o stdlib.o ceu_pool.o ceu_os.o app.o main.o \
+	$(ARMGNU)-ld vectors.o ceu_log.o stdlib.o ceu_pool.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	#$(ARMGNU)-gcc -g $(CFLAGS)
 				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s
