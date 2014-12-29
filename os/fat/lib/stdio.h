@@ -28,6 +28,8 @@
 // Include vfs.h to get the FILE definition
 #include "vfs.h"
 
+#define BUFSIZ 1024
+
 #define stdin ((FILE *)0)
 #define stdout ((FILE *)1)
 #define stderr ((FILE *)2)
