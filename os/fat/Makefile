@@ -3,7 +3,7 @@ SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
 CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
+CFLAGS += -DCEU_DEBUG -DCEU_OS -DCEU_OS_LUA -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
@@ -23,7 +23,7 @@ CFLAGS_FAT = -pedantic -pedantic-errors \
 		$(CFLAGS_ONE)
 
 tst1: fat kernel
-	ceu tst1.ceu --os --verbose \
+	ceu tst1.ceu --os --os-lua --verbose \
 				--out-c _ceu_tst1.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -43,7 +43,7 @@ tst1: fat kernel
 
 tst2: fat kernel
 	cd ../led && make led && cd - && cp ../led/led.app .
-	ceu tst2.ceu --os --verbose \
+	ceu tst2.ceu --os --os-lua --verbose \
 				--out-c _ceu_tst2.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -65,7 +65,7 @@ tst3: fat kernel
 	cd ../led  && make led  && cd - && cp ../led/led.app .
 	cd ../uart && make uart && cd - && cp ../uart/uart.app .
 	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
-	ceu tst3.ceu --os --verbose \
+	ceu tst3.ceu --os --os-lua --verbose \
 				--out-c _ceu_tst3.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -88,7 +88,7 @@ tst4: fat kernel
 	cd ../uart && make uart && cd - && cp ../uart/uart.app .
 	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
 	cd ../lua  && make lua  && cd - && cp ../lua/lua.app .
-	ceu tst4.ceu --os --verbose \
+	ceu tst4.ceu --os --os-lua --verbose \
 				--out-c _ceu_tst4.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -108,12 +108,12 @@ tst4: fat kernel
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
-init: fat kernel
+tst5: fat kernel
 	cd ../led  && make led  && cd - && cp ../led/led.app .
 	cd ../uart && make uart && cd - && cp ../uart/uart.app .
 	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
 	cd ../lua  && make lua  && cd - && cp ../lua/lua.app .
-	ceu init.ceu --os --verbose \
+	ceu tst5.ceu --os --os-lua --verbose \
 				--out-c _ceu_init.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -124,7 +124,7 @@ init: fat kernel
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".bss"
-	$(ARMGNU)-objcopy _ceu_init.elf -O binary init.app
+	$(ARMGNU)-objcopy _ceu_init.elf -O binary tst5.app
 	$(ARMGNU)-objcopy _ceu_init.elf --change-addresses=0x300000 -O ihex _ceu_init.hex
 	###
 	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
@@ -134,7 +134,7 @@ init: fat kernel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 fat:
-	ceu fat.ceu --os --verbose \
+	ceu fat.ceu --os --os-lua --verbose \
 				--out-c _ceu_fat.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
