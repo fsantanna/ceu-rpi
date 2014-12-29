@@ -6,9 +6,6 @@ CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
-#CFLAGS += -fpic -mpic-data-is-text-relative
-#CFLAGS += -fwhole-program #-flto
-#LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 CFLAGS_ONE += -fno-zero-initialized-in-bss
@@ -84,6 +81,31 @@ tst3: fat kernel
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
+tst4: fat kernel
+	cd ../led  && make led  && cd - && cp ../led/led.app .
+	cd ../uart && make uart && cd - && cp ../uart/uart.app .
+	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
+	cd ../lua  && make lua  && cd - && cp ../lua/lua.app .
+	ceu tst4.ceu --os --verbose \
+				--out-c _ceu_tst4.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_tst4.c .
+	$(ARMGNU)-gcc -I. -Ilib/ -I../lua/lua-5.1.5/src/ \
+		$(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		_ceu_tst4.c -o _ceu_tst4.elf
+	! strings -a _ceu_lua.elf | grep libc | grep newlib
+	! $(ARMGNU)-objdump -h _ceu_tst4.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_tst4.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_tst4.elf -O binary tst4.app
+	$(ARMGNU)-objcopy _ceu_tst4.elf --change-addresses=0x300000 -O ihex _ceu_tst4.hex
+	###
+	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
+			   _ceu_fat.hex  -intel -offset -0x8000 \
+			   _ceu_tst4.hex -intel -offset -0x8000 \
+					-o all.hex -intel
+	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
 fat:
 	ceu fat.ceu --os --verbose \
 				--out-c _ceu_fat.c \
@@ -109,7 +131,7 @@ fat:
 	$(ARMGNU)-ar rcs libfat.a \
 		lib/libfs.o lib/emmc.o lib/block.o lib/mbr.o lib/fat.o lib/vfs.o \
 		lib/timer.o lib/mmio.o lib/boot.o lib/mbox.o lib/stdlib.o lib/heap.o \
-		lib/div.o lib/malloc.o lib/printf.o
+		lib/malloc.o lib/printf.o
 	# all
 	$(ARMGNU)-gcc -I. -Ilib/ $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		_ceu_fat.c -o _ceu_fat.elf -L. -lfat -lgcc
@@ -128,11 +150,11 @@ kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/puts.c     -o puts.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(CFLAGS) -include $(CEUDIR)/ceu_log.h -c $(CEUDIR)/ceu_os.c -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o puts.o ceu_os.o app.o main.o \
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_log.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
@@ -146,6 +168,7 @@ sdcard:
 	sudo cp kernel.img /mnt/kernel.img
 	touch led.app uart.app uart_tst.app
 	sudo cp *.app /mnt/
+	sudo cp *.lua /mnt/
 	sudo umount /mnt
 
 xmodem:

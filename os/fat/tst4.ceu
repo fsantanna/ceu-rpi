@@ -1,0 +1,200 @@
+native/pre do
+    ##include "vfs.h"
+    ##include "lua.h"
+end
+
+native do
+    #define ceu_out_realloc_unsafe ceu_out_realloc
+    #define ceu_out_load_unsafe    ceu_out_load
+end
+
+native @nohold _ceu_out_load(), _ceu_out_log();
+native @pure _ceu_out_start(), _ceu_out_link();
+native @pure _ceu_out_load_unsafe(), _ceu_out_realloc_unsafe();
+
+output (char* path, char* mode)=>_FILE* OPEN;
+output (_FILE* f)=>int CLOSE;
+output (_FILE* f)=>int SIZE;
+output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
+
+output (void)=>_lua_State* LUA_NEW;
+output (_lua_State* l, _lua_Number v)=>void LUA_PUSHNUMBER;
+output (_lua_State* l, int index)=>int LUA_TONUMBER;
+output (_lua_State* l, char* name)=>void LUA_GETGLOBAL;
+output (_lua_State* l)=>void LUA_PUSHNIL;
+output (_lua_State* l, int index)=>int LUA_NEXT;
+output (_lua_State* l, int index, char* k)=>void LUA_GETFIELD;
+output (_lua_State* l, int index)=>char* LUA_TOSTRING;
+output (_lua_State* l, char* str)=>int LUAL_DOSTRING;
+output (_lua_State *l, int index)=>int LUA_TYPE;
+output (_lua_State *l, int n)=>void LUA_POP;
+output (_lua_State *l, void *p)=>void LUA_PUSHLIGHTUSERDATA;
+output (_lua_State *l, int index, char *k)=>void LUA_SETFIELD;
+output (_lua_State *l, int index)=>int LUA_OBJLEN;
+output (_lua_State *l, int index, int n)=>void LUA_RAWGETI;
+output (_lua_State *l)=>int LUA_GETTOP;
+output (_lua_State *l, int index)=>void* LUA_TOLIGHTUSERDATA;
+
+        // TODO: pure
+function (char* path)=>_tceu_app* app_load do
+    var _FILE[] f = (call OPEN => (path, "r"));
+    _ceu_out_assert(f != null);
+
+    var int flen = (call SIZE => f);
+    var char[] buf = (char *)_ceu_out_realloc_unsafe(null, flen);
+    call READ => (buf, 1, flen, f);
+    call CLOSE => f;
+
+    var _tceu_app* app = _ceu_out_load_unsafe(buf);
+    _ceu_out_assert(app != null);
+    return app;
+end
+
+// LUA
+
+var _tceu_app[] lua;
+finalize
+    lua = app_load("lua.app");
+with
+    nothing;        // TODO
+end
+
+_ceu_out_link( __ceu_app,5   ,  lua,243 );
+_ceu_out_link( __ceu_app,6   ,  lua,242 );
+_ceu_out_link( __ceu_app,7   ,  lua,241 );
+_ceu_out_link( __ceu_app,8   ,  lua,240 );
+_ceu_out_link( __ceu_app,9   ,  lua,239 );
+_ceu_out_link( __ceu_app,10  ,  lua,238 );
+_ceu_out_link( __ceu_app,11  ,  lua,237 );
+_ceu_out_link( __ceu_app,12  ,  lua,236 );
+_ceu_out_link( __ceu_app,13  ,  lua,235 );
+_ceu_out_link( __ceu_app,14  ,  lua,234 );
+_ceu_out_link( __ceu_app,15  ,  lua,233 );  // POP
+_ceu_out_link( __ceu_app,16  ,  lua,232 );  // PUSHLIGHTUSERDATA
+_ceu_out_link( __ceu_app,17  ,  lua,231 );  // SETFIELD
+_ceu_out_link( __ceu_app,18  ,  lua,230 );  // OBJLEN
+_ceu_out_link( __ceu_app,19  ,  lua,229 );  // RAWGETI
+_ceu_out_link( __ceu_app,20  ,  lua,228 );  // GETTOP
+_ceu_out_link( __ceu_app,21  ,  lua,227 );  // TOLIGHTUSERDATA
+
+await 1s;
+
+_ceu_out_start(lua);
+
+var _lua_State* l = (call LUA_NEW);
+_ceu_out_assert(l != null);
+
+// dofile 'tst4.lua'
+do
+    var char[1000] buf;
+    var _FILE[] f = null;
+    //finalize
+        f = (call OPEN => ("tst4.lua", "r"));
+    //finalize
+    //with
+        //call CLOSE => f;
+    //end
+    _ceu_out_assert(f != null);
+
+    var int flen = (call SIZE => f);
+    /*
+    var char* buf;
+    finalize
+        buf = (char *)_ceu_out_realloc(null, flen);
+    with
+        nothing;    // TODO
+    end
+    */
+    call READ => (buf, 1, flen, f);
+    buf[flen] = '\0';
+    var int ret = (call LUAL_DOSTRING => (l, buf));
+    _ceu_out_assert(ret == 0);
+end
+
+// parse 'tst4.lua'
+do
+    // load apps
+    call LUA_GETGLOBAL => (l, "apps");              // [ apps ]
+    call LUA_PUSHNIL => l;                          // [ apps | key ]
+    loop do
+        var int has = (call LUA_NEXT => (l, -2));   // [ apps | key | t ]
+        if has==0 then
+            break;                                  // [ apps ]
+        end
+
+        call LUA_GETFIELD => (l, -1, "source");     // [ apps | key | t | t.source ]
+        var int tp = (call LUA_TYPE => (l,-1));
+        if tp == _LUA_TSTRING then
+            var char* source = (call LUA_TOSTRING => (l,-1));
+            var _tceu_app* app;
+            finalize
+                app = app_load(source);
+            with
+                // TODO
+            end
+            call LUA_PUSHLIGHTUSERDATA => (l, app); // [ apps | key | t | t.source | app ]
+            call LUA_SETFIELD => (l,-3,"pointer");  // [ apps | key | t | t.source ]
+        end
+        call LUA_POP => (l, 2);                     // [ apps | key ]
+    end
+    call LUA_POP => (l, 1);                         // [ ]
+
+    // apps.lua.pointer = lua
+    call LUA_GETGLOBAL => (l, "apps");              // [ apps ]
+    call LUA_GETFIELD => (l, -1, "lua");            // [ apps | apps.lua ]
+    call LUA_PUSHLIGHTUSERDATA => (l, lua);         // [ apps | apps.lua | lua ]
+    call LUA_SETFIELD => (l, -2, "pointer");        // [ apps | apps.lua ]
+    call LUA_POP => (l, 2);                         // [ ]
+
+    // link links
+    call LUA_GETGLOBAL => (l, "links");             // [ links ]
+    var int n = (call LUA_OBJLEN => (l,-1));
+    loop i in n do
+        call LUA_RAWGETI => (l, -1, (i+1));         // [ links | links[i] ]
+        var int lnk = (call LUA_GETTOP => l);
+
+        // app1,evt1
+        call LUA_RAWGETI => (l, lnk, 1);            // [ ... | app1 ]
+        call LUA_GETFIELD => (l, -1, "pointer");    // [ ... | app1 | app1.pointer ]
+        var _tceu_app* app1 = (call LUA_TOLIGHTUSERDATA => (l,-1));
+        call LUA_RAWGETI => (l, lnk, 2);            // [ ... | app1 | app1.pointer | evt1 ]
+        var int evt1 = (call LUA_TONUMBER => (l,-1));
+        call LUA_POP => (l,3);                      // [ links | links[i] ]
+
+        // app2,evt2
+        call LUA_RAWGETI => (l, lnk, 3);            // [ ... | app2 ]
+        call LUA_GETFIELD => (l, -1, "pointer");    // [ ... | app2 | app2.pointer ]
+        var _tceu_app* app2 = (call LUA_TOLIGHTUSERDATA => (l,-1));
+        call LUA_RAWGETI => (l, lnk, 4);            // [ ... | app2 | app2.pointer | evt2 ]
+        var int evt2 = (call LUA_TONUMBER => (l,-1));
+        call LUA_POP => (l,3);                      // [ links | links[i] ]
+
+        _ceu_out_link(app1,evt1 , app2,evt2);
+        call LUA_POP => (l, 1);                     // [ links ]
+    end
+    call LUA_POP => (l, 1);                         // [ ]
+
+    // start apps
+    call LUA_GETGLOBAL => (l, "apps");              // [ apps ]
+    call LUA_PUSHNIL => l;                          // [ apps | key ]
+    loop do
+        var int has = (call LUA_NEXT => (l, -2));   // [ apps | key | t ]
+        if has==0 then
+            break;                                  // [ apps ]
+        end
+
+        call LUA_GETFIELD => (l, -1, "source");     // [ apps | key | t | t.source ]
+        var int tp = (call LUA_TYPE => (l,-1));
+        if tp == _LUA_TSTRING then
+            call LUA_GETFIELD => (l, -2, "pointer");// [ apps | key | t | t.source | t.pointer ]
+            var _tceu_app* app = (call LUA_TOLIGHTUSERDATA => (l,-1));
+            _ceu_out_start(app);
+            call LUA_POP => (l, 1);                 // [ apps | key | t | t.source ]
+        end
+
+        call LUA_POP => (l, 2);                     // [ apps | key ]
+    end
+    call LUA_POP => (l, 1);                         // [ ]
+end
+
+await FOREVER;
