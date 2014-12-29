@@ -5,6 +5,8 @@ CEUDIR = /data/ceu/ceu-rpi/os
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nostdinc -isystem ../musl/include
+CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
 CFLAGS += -fno-zero-initialized-in-bss
 
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
@@ -106,6 +108,31 @@ tst4: fat kernel
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
+init: fat kernel
+	cd ../led  && make led  && cd - && cp ../led/led.app .
+	cd ../uart && make uart && cd - && cp ../uart/uart.app .
+	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
+	cd ../lua  && make lua  && cd - && cp ../lua/lua.app .
+	ceu init.ceu --os --verbose \
+				--out-c _ceu_init.c \
+				--cpp-exe "arm-none-eabi-cpp" \
+				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_init.c .
+	$(ARMGNU)-gcc -I. -Ilib/ -I../lua/lua-5.1.5/src/ \
+		$(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+		_ceu_init.c -o _ceu_init.elf -L ../musl/lib -lc
+	! strings -a _ceu_lua.elf | grep libc | grep newlib
+	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".got"
+	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".bss"
+	$(ARMGNU)-objcopy _ceu_init.elf -O binary init.app
+	$(ARMGNU)-objcopy _ceu_init.elf --change-addresses=0x300000 -O ihex _ceu_init.hex
+	###
+	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
+			   _ceu_fat.hex  -intel -offset -0x8000 \
+			   _ceu_init.hex -intel -offset -0x8000 \
+					-o all.hex -intel
+	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
 fat:
 	ceu fat.ceu --os --verbose \
 				--out-c _ceu_fat.c \
@@ -151,7 +178,8 @@ kernel:
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
-	$(ARMGNU)-gcc $(CFLAGS) -include $(CEUDIR)/ceu_log.h -c $(CEUDIR)/ceu_os.c -o ceu_os.o
+	$(ARMGNU)-gcc $(CFLAGS) -include $(CEUDIR)/ceu_log.h \
+		-c $(CEUDIR)/ceu_os.c -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
 	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_log.o ceu_os.o app.o main.o \

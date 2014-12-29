@@ -53,11 +53,11 @@ input (_lua_State* l, char* str)=>int L_DOSTRING do
     return _luaL_dostring(l, str);
 end
 
-input (_lua_State *l, int index)=>int LUA_TYPE do
+input (_lua_State *l, int index)=>int TYPE do
     return _lua_type(l, index);
 end
 
-input (_lua_State *l, int n)=>void LUA_POP do
+input (_lua_State *l, int n)=>void POP do
     _lua_pop(l, n);
 end
 
@@ -83,6 +83,42 @@ end
 
 input (_lua_State *l, int index)=>void* TOLIGHTUSERDATA do
     return _lua_touserdata(l, index);
+end
+
+input (_lua_State* l, char* str)=>int L_LOADSTRING do
+    return _luaL_loadstring(l, str);
+end
+
+input (_lua_State* l)=>int LUA_ERROR do
+    return _lua_error(l);
+end
+
+input (_lua_State* l, int index)=>int LUA_ISNUMBER do
+    _lua_isnumber(l, index);
+end
+
+input (_lua_State* l, int index)=>int LUA_ISBOOLEAN do
+    _lua_isboolean(l, index);
+end
+
+input (_lua_State* l, int index)=>int LUA_ISSTRING do
+    _lua_isstring(l, index);
+end
+
+input (_lua_State* l, int index)=>int LUA_ISLIGHTUSERDATA do
+    _lua_islightuserdata(l, index);
+end
+
+input (_lua_State* l, int index)=>int TOBOOLEAN do
+    return _lua_toboolean(l, index);
+end
+
+input (_lua_State* l, int index)=>int TOUSERDATA do
+    return _lua_touserdata(l, index);
+end
+
+input (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL do
+    return _lua_pcall(l, nargs, nresults, errfunc);
 end
 
 /*
