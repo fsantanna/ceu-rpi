@@ -17,7 +17,14 @@
 #define AUX_MU_STAT_REG ((volatile unsigned int*)0x20215064)
 #define AUX_MU_BAUD_REG ((volatile unsigned int*)0x20215068)
 
-static void log_init (void) {
+static void init (void) {
+    static int _init = 0;
+    if (_init) {
+        return;
+    } else {
+        _init = 1;
+    }
+
     *AUX_ENABLES = 1;
     *AUX_MU_IER_REG = 0;
     *AUX_MU_CNTL_REG = 0;
@@ -45,7 +52,8 @@ static void log_init (void) {
     *AUX_MU_CNTL_REG = 3;
 }
 
-static void putc (unsigned int c) {
+void ceu_log_putc (unsigned int c) {
+    init();
     while (! (*AUX_MU_LSR_REG & 0x20) );
     *AUX_MU_IO_REG = c;
 }
@@ -59,26 +67,22 @@ static void hex (unsigned int d) {
         rb-=4;
         rc=(d>>rb)&0xF;
         if(rc>9) rc+=0x37; else rc+=0x30;
-        putc(rc);
+        ceu_log_putc(rc);
         if(rb==0) break;
     }
-    //putc(0x20);
+    //ceu_log_putc(0x20);
 }
 
 void ceu_log (int mode, char* s) {
     int i = 0;
-    static int init = 0;
-    if (! init) {
-        init = 1;
-        log_init();
-    }
+    init();
     if (mode == 1) {
         // HEX
         hex((unsigned int)s);
     } else {
         // STRING
         while (s[i] != '\0') {
-            putc(s[i]);
+            ceu_log_putc(s[i]);
             i++;
         }
     }
