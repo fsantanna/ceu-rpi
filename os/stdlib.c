@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "ceu_log.h"
 
 #define MEM_TOTAL 1000000
 static char   MEM_buf[MEM_TOTAL] = {0};   /* {0} avoids .bss */
@@ -6,7 +7,6 @@ static size_t MEM_i = 0;
 
 void* realloc (void* ptr, size_t size) {
     if (size > 0) {
-        // TODO: realloc
         size_t nxt = MEM_i + size;
         int mod = nxt % 4;  // TODO: 4 hardcoded
         if (mod) {
@@ -15,8 +15,13 @@ void* realloc (void* ptr, size_t size) {
         if (nxt <= MEM_TOTAL) {
             void* ret = &MEM_buf[MEM_i];
             MEM_i = nxt;
+            if (ptr != NULL) {
+                // realloc
+                memcpy(ret, ptr, size);
+            }
             return ret;
         } else {
+            ceu_log(0,"=== NO MEMORY ===\n");
             return NULL;
         }
     } else {
