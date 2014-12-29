@@ -1,3 +1,4 @@
+int __errno = 0;
 void _exit (int status) {
 }
 

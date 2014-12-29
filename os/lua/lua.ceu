@@ -1,6 +1,7 @@
 native/pre do
     ##include "lua.h"
     ##include "lauxlib.h"
+    ##include "string.h"
 end
 
 native do
@@ -49,15 +50,41 @@ input (_lua_State* l, int index)=>char* TOSTRING do
 end
 
 input (_lua_State* l, char* str)=>int L_DOSTRING do
-    var int ret = _luaL_dostring(l, str);
-    if ret then
-        _ceu_out_log(0, "NO\n");
-    else
-        _ceu_out_log(0, "OK\n");
-    end
+    return _luaL_dostring(l, str);
 end
 
-_ceu_out_log(0, "lua started\n");
+input (_lua_State *l, int index)=>int LUA_TYPE do
+    return _lua_type(l, index);
+end
+
+input (_lua_State *l, int n)=>void LUA_POP do
+    _lua_pop(l, n);
+end
+
+input (_lua_State *l, void *p)=>void PUSHLIGHTUSERDATA do
+    _lua_pushlightuserdata(l, p);
+end
+
+input (_lua_State *l, int index, char *k)=>void SETFIELD do
+    _lua_setfield(l, index, k);
+end
+
+input (_lua_State *l, int index)=>int OBJLEN do
+    return _lua_objlen(l, index);
+end
+
+input (_lua_State *l, int index, int n)=>void RAWGETI do
+    _lua_rawgeti(_l, index, n);
+end
+
+input (_lua_State *l)=>int GETTOP do
+    return _lua_gettop(l);
+end
+
+input (_lua_State *l, int index)=>void* TOLIGHTUSERDATA do
+    return _lua_touserdata(l, index);
+end
+
 /*
 _lua_pushnumber(l, 10);
 var int v = _lua_tonumber(l, -1);

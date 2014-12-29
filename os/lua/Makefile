@@ -4,7 +4,7 @@ CEUDIR = /data/ceu/ceu-rpi/os
 
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
-CFLAGS += -nodefaultlibs -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
 CFLAGS += -nostdinc -isystem ../musl/include
 #CFLAGS += -fpic -mpic-data-is-text-relative
@@ -43,6 +43,28 @@ tst1: lua kernel
 			   _ceu_tst1.hex -intel -offset -0x8000 \
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
+
+main:
+	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE)
+	cd lua-5.1.5/ && make generic && cd -
+	$(ARMGNU)-as vectors.s -o vectors.o
+	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/syscalls.c -o syscalls.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(CFLAGS) -Ilua-5.1.5/src/ -c main.c -o main.o
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o main.o \
+				-T $(CEUDIR)/kernel.ld -o kernel.elf \
+				-L lua-5.1.5/src -llua \
+				-L /usr/lib/arm-none-eabi/newlib \
+				-L $(CEUDIR)/../newlib-1.20.0/arm-none-eabi/newlib -lc \
+				-L /usr/lib/gcc/arm-none-eabi/4.8.2 -lgcc
+	###
+	#! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
+	#! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
+	$(ARMGNU)-objdump -S -D kernel.elf > kernel.list
+	$(ARMGNU)-size kernel.elf
+	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
+
 
 lua:
 	cd lua-5.1.5/ && make generic && cd -

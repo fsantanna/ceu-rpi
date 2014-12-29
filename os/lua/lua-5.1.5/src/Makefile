@@ -14,11 +14,11 @@ RANLIB= ranlib
 RM= rm -f
 LIBS= -lm $(MYLIBS)
 
-CFLAGS += -nodefaultlibs -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -nostdinc -isystem ../../../musl/include
 CFLAGS += -fno-zero-initialized-in-bss
 CFLAGS += -fpic
-#CFLAGS += -include log.h
+CFLAGS += -include ceu_log.h
 MYLDFLAGS=
 MYLIBS=
 
@@ -29,7 +29,7 @@ PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
 LUA_A=	liblua.a
 CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
 	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
-	lundump.o lvm.o lzio.o #log.o
+	lundump.o lvm.o lzio.o ceu_log.o
 LIB_O= lauxlib.o
 	#lauxlib.o lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o
 	#lstrlib.o loadlib.o linit.o
