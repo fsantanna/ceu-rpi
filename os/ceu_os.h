@@ -174,7 +174,9 @@
 #endif
 
 #ifdef CEU_LUA
-#ifdef __ANDROID__
+#include <stdio.h>      /* BUFSIZ */
+#include <string.h>     /* strcpy */
+#if defined(__ANDROID__) || defined(CEU_OS)
     #include "lua.h"
     #include "lauxlib.h"
     #include "lualib.h"
@@ -182,6 +184,107 @@
     #include <lua5.1/lua.h>
     #include <lua5.1/lauxlib.h>
     #include <lua5.1/lualib.h>
+#endif
+
+#ifdef CEU_OS
+    #define ceu_luaL_newstate(set) { \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_NEW, CEU_EVTP((void*)NULL)).ptr; \
+    }
+
+    #define ceu_lua_atpanic(l, f) { \
+        ceu_out_assert(0);  /* TODO */
+    }
+
+    #define ceu_luaL_loadstring(set, l, str) {  \
+        tceu__lua_State___char_ p = { l, str }; \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUAL_LOADSTRING, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_pushnumber(l, v) {      \
+        tceu__lua_State___int p = { l, v }; \
+        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PUSHNUMBER, CEU_EVTP((void*)&p)); \
+    }
+
+    #define ceu_lua_pushstring(l, v) {      \
+        tceu__lua_State___int p = { l, v }; \
+        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PUSHSTRING, CEU_EVTP((void*)&p)); \
+    }
+
+    #define ceu_lua_pushlightuserdata(l, v) {   \
+        tceu__lua_State___void_ p = { l, v };     \
+        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PUSHLIGHTUSERDATA, CEU_EVTP((void*)&p)); \
+    }
+
+    #define ceu_lua_pcall(set,l,nargs,nrets,err) {      \
+    }
+
+    #define ceu_lua_isnumber(set, l, idx) {     \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISNUMBER, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_tonumber(set, l, idx) {     \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TONUMBER, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_isboolean(set, l, idx) {    \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISBOOLEAN, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_toboolean(set, l, idx) {    \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TOBOOLEAN, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_pop(l, n) {             \
+        tceu__lua_State___int p = { l, n }; \
+        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_POP, CEU_EVTP((void*)&p)); \
+    }
+
+    #define ceu_lua_isstring(set, l, idx) {     \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISSTRING, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_tostring(set, l, idx) {     \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TOSTRING, CEU_EVTP((void*)&p)).ptr; \
+    }
+
+    #define ceu_lua_islightuserdata(set, l, idx) {  \
+        tceu__lua_State___int p = { l, idx };       \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISLIGHTUSERDATA, CEU_EVTP((void*)&p)).v; \
+    }
+
+    #define ceu_lua_touserdata(set, l, idx) {   \
+        tceu__lua_State___int p = { l, idx };   \
+        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TOUSERDATA, CEU_EVTP((void*)&p)).ptr; \
+    }
+
+    #define ceu_lua_error(l) {  \
+        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ERROR, CEU_EVTP((void*)NULL)); \
+    }
+#else
+    #define ceu_luaL_newstate(set)               set = luaL_newstate()
+    #define ceu_luaL_openlibs(l)                 luaL_openlibs(l)
+    #define ceu_lua_atpanic(l,f)                 lua_atpanic(l,f)
+    #define ceu_luaL_loadstring(set,l,str)       set = luaL_loadstring(l,str)
+    #define ceu_lua_pushnumber(l,v)              lua_pushnumber(l,v)
+    #define ceu_lua_pushstring(l,v)              lua_pushstring(l,v)
+    #define ceu_lua_pushlightuserdata(l,v)       lua_pushlightuserdata(l,v)
+    #define ceu_lua_pcall(set,l,nargs,nrets,err) set = lua_pcall(l,nargs,nrets,err)
+    #define ceu_lua_isnumber(set,l,idx)          set = lua_isnumber(l,idx)
+    #define ceu_lua_tonumber(set,l,idx)          set = lua_tonumber(l,idx)
+    #define ceu_lua_isboolean(set,l,idx)         set = lua_isboolean(l,idx)
+    #define ceu_lua_toboolean(set,l,idx)         set = lua_toboolean(l,idx)
+    #define ceu_lua_pop(l,n)                     lua_pop(l,n)
+    #define ceu_lua_isstring(set,l,idx)          set = lua_isstring(l,idx)
+    #define ceu_lua_tostring(set,l,idx)          set = lua_tostring(l,idx)
+    #define ceu_lua_islightuserdata(set,l,idx)   set = lua_islightuserdata(l,idx)
+    #define ceu_lua_touserdata(set,l,idx)        set = lua_touserdata(l,idx)
+    #define ceu_lua_error(l)                     lua_error(l)
 #endif
 #endif
 
@@ -512,7 +615,7 @@ tceu_queue* ceu_sys_queue_nxt (void);
 void        ceu_sys_queue_rem (void);
 
 void      ceu_sys_assert    (int v);
-void      ceu_sys_log       (int mode, char* str);
+void      ceu_sys_log       (int mode, const void* str);
 void*     ceu_sys_realloc   (void* ptr, size_t size);
 int       ceu_sys_req       (void);
 tceu_app* ceu_sys_load      (void* addr);
