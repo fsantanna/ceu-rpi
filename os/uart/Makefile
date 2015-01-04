@@ -2,6 +2,10 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
+ifdef LUA
+ceuoslua = --os-lua
+endif
+
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I$(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
@@ -19,12 +23,13 @@ all: uart tst
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
 	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/debug.c    -o debug.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
 	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_os.o app.o main.o \
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o ceu_pool.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	#$(ARMGNU)-gcc -g $(CFLAGS)
 				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s
@@ -47,7 +52,7 @@ all: uart tst
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 uart:
-	ceu uart.ceu --os --verbose \
+	ceu uart.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_uart.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -59,7 +64,7 @@ uart:
 	$(ARMGNU)-objcopy _ceu_uart.elf -O binary uart.app
 
 tst:
-	ceu tst.ceu --os --verbose \
+	ceu tst.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_tst.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

@@ -17,7 +17,7 @@ LIBS= -lm $(MYLIBS)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -nostdinc -isystem ../../../musl/include
 CFLAGS += -fno-zero-initialized-in-bss
-CFLAGS += -fpic
+CFLAGS += -fpic -mpic-data-is-text-relative
 CFLAGS += -include ceu_log.h
 MYLDFLAGS=
 MYLIBS=
@@ -30,7 +30,7 @@ LUA_A=	liblua.a
 CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
 	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
 	lundump.o lvm.o lzio.o ceu_log.o
-LIB_O= lauxlib.o
+LIB_O= lauxlib.o lbaselib.o linit.o
 	#lauxlib.o lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o
 	#lstrlib.o loadlib.o linit.o
 

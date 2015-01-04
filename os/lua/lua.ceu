@@ -1,5 +1,6 @@
 native/pre do
     ##include "lua.h"
+    ##include "lualib.h"
     ##include "lauxlib.h"
     ##include "string.h"
 end
@@ -74,7 +75,7 @@ input (_lua_State *l, int index)=>int OBJLEN do
 end
 
 input (_lua_State *l, int index, int n)=>void RAWGETI do
-    _lua_rawgeti(_l, index, n);
+    _lua_rawgeti(l, index, n);
 end
 
 input (_lua_State *l)=>int GETTOP do
@@ -89,36 +90,51 @@ input (_lua_State* l, char* str)=>int L_LOADSTRING do
     return _luaL_loadstring(l, str);
 end
 
-input (_lua_State* l)=>int LUA_ERROR do
+input (_lua_State* l)=>int ERROR do
+    _ceu_out_log(0, "LUA ERROR: ");
+    _ceu_out_log(0, _lua_tostring(l,-1));
+    _ceu_out_log(0, "\n");
     return _lua_error(l);
 end
 
-input (_lua_State* l, int index)=>int LUA_ISNUMBER do
-    _lua_isnumber(l, index);
+input (_lua_State* l, int index)=>int ISNUMBER do
+    return _lua_isnumber(l, index);
 end
 
-input (_lua_State* l, int index)=>int LUA_ISBOOLEAN do
-    _lua_isboolean(l, index);
+input (_lua_State* l, int index)=>int ISBOOLEAN do
+    return _lua_isboolean(l, index);
 end
 
-input (_lua_State* l, int index)=>int LUA_ISSTRING do
-    _lua_isstring(l, index);
+input (_lua_State* l, int index)=>int ISSTRING do
+    return _lua_isstring(l, index);
 end
 
-input (_lua_State* l, int index)=>int LUA_ISLIGHTUSERDATA do
-    _lua_islightuserdata(l, index);
+input (_lua_State* l, int index)=>int ISLIGHTUSERDATA do
+    return _lua_islightuserdata(l, index);
 end
 
 input (_lua_State* l, int index)=>int TOBOOLEAN do
     return _lua_toboolean(l, index);
 end
 
-input (_lua_State* l, int index)=>int TOUSERDATA do
+input (_lua_State* l, int index)=>void* TOUSERDATA do
     return _lua_touserdata(l, index);
 end
 
-input (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL do
+input (_lua_State* l, int nargs, int nresults, int errfunc)=>int PCALL do
     return _lua_pcall(l, nargs, nresults, errfunc);
+end
+
+input (_lua_State* l, char* str)=>void PUSHSTRING do
+    _lua_pushstring(l, str);
+end
+
+input (_lua_State* l)=>void L_OPENLIBS do
+_ceu_out_log(0, "before ");
+_ceu_out_log(1, l);
+_ceu_out_log(0, "\n");
+    _luaL_openlibs(l);
+_ceu_out_log(0, "after\n");
 end
 
 /*

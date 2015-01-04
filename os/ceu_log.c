@@ -22,6 +22,8 @@ static void init (void) {
     if (_init) {
         return;
     } else {
+        volatile int i=0;
+        while(i++ < 9999999);
         _init = 1;
     }
 

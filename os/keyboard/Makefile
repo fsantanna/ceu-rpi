@@ -2,6 +2,10 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
+ifdef LUA
+ceuoslua = --os-lua
+endif
+
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
@@ -17,7 +21,7 @@ all:
 	cd ../framebuffer && make
 	cp ../framebuffer/_ceu_framebuffer.hex .
 	###
-	ceu keyboard.ceu --os --verbose \
+	ceu keyboard.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_keyboard.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -29,7 +33,7 @@ all:
 	$(ARMGNU)-objcopy _ceu_keyboard.elf -O binary keyboard.app
 	$(ARMGNU)-objcopy _ceu_keyboard.elf --change-addresses=0x113000 -O ihex _ceu_keyboard.hex
 	###
-	ceu tst.ceu --os --verbose \
+	ceu tst.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_tst.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

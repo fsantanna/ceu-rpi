@@ -41,8 +41,10 @@ output (_lua_State* l, int index)=>int LUA_ISBOOLEAN;
 output (_lua_State* l, int index)=>int LUA_ISSTRING;
 output (_lua_State* l, int index)=>int LUA_ISLIGHTUSERDATA;
 output (_lua_State* l, int index)=>int LUA_TOBOOLEAN;
-output (_lua_State* l, int index)=>int LUA_TOUSERDATA;
+output (_lua_State* l, int index)=>void* LUA_TOUSERDATA;
 output (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL;
+output (_lua_State* l, char* str)=>void LUA_PUSHSTRING;
+output (_lua_State* l)=>void LUAL_OPENLIBS;
 
         // TODO: pure
 function (char* path)=>_tceu_app* app_load do
@@ -59,55 +61,26 @@ function (char* path)=>_tceu_app* app_load do
     return app;
 end
 
-// LUA
-
-var _tceu_app[] lua;
-finalize
-    lua = app_load("lua.app");
-with
-    nothing;        // TODO
-end
-
-_ceu_out_link( __ceu_app,5   ,  lua,243 );
-_ceu_out_link( __ceu_app,6   ,  lua,242 );
-_ceu_out_link( __ceu_app,7   ,  lua,241 );
-_ceu_out_link( __ceu_app,8   ,  lua,240 );
-_ceu_out_link( __ceu_app,9   ,  lua,239 );
-_ceu_out_link( __ceu_app,10  ,  lua,238 );
-_ceu_out_link( __ceu_app,11  ,  lua,237 );
-_ceu_out_link( __ceu_app,12  ,  lua,236 );
-_ceu_out_link( __ceu_app,13  ,  lua,235 );
-_ceu_out_link( __ceu_app,14  ,  lua,234 );
-_ceu_out_link( __ceu_app,15  ,  lua,233 );  // POP
-_ceu_out_link( __ceu_app,16  ,  lua,232 );  // PUSHLIGHTUSERDATA
-_ceu_out_link( __ceu_app,17  ,  lua,231 );  // SETFIELD
-_ceu_out_link( __ceu_app,18  ,  lua,230 );  // OBJLEN
-_ceu_out_link( __ceu_app,19  ,  lua,229 );  // RAWGETI
-_ceu_out_link( __ceu_app,20  ,  lua,228 );  // GETTOP
-_ceu_out_link( __ceu_app,21  ,  lua,227 );  // TOLIGHTUSERDATA
-_ceu_out_link( __ceu_app,22  ,  lua,226 );  // L_LOADSTRING
-_ceu_out_link( __ceu_app,23  ,  lua,225 );  // ERROR
-_ceu_out_link( __ceu_app,24  ,  lua,224 );  // ISNUMBER
-_ceu_out_link( __ceu_app,25  ,  lua,223 );  // ISBOOLEAN
-_ceu_out_link( __ceu_app,27  ,  lua,222 );  // ISSTRING
-_ceu_out_link( __ceu_app,28  ,  lua,221 );  // ISLIGHTUSERDATA
-_ceu_out_link( __ceu_app,29  ,  lua,220 );  // TOBOOLEAN
-_ceu_out_link( __ceu_app,30  ,  lua,219 );  // TOUSERDATA
-_ceu_out_link( __ceu_app,31  ,  lua,218 );  // PCALL
+/*
+#define GPFSEL1 ((uint*)0x20200004)
+#define GPSET0  ((uint*)0x2020001C)
+#define GPCLR0  ((uint*)0x20200028)
+var uint ra;
+ra = *GPFSEL1;
+ra = ra & ~(7<<18);
+ra = ra | 1<<18;
+*GPFSEL1 = ra;
+*GPCLR0 = 1<<16;   // GPIO16 on
+*/
 
 await 1s;
 
-_ceu_out_start(lua);
-
-var _lua_State* l = (call LUA_NEW);
-_ceu_out_assert(l != null);
-
-// dofile 'tst4.lua'
+// dofile 'tst5.lua'
 do
     var char[1000] buf;
     var _FILE[] f = null;
     //finalize
-        f = (call OPEN => ("tst4.lua", "r"));
+        f = (call OPEN => ("tst5.lua", "r"));
     //finalize
     //with
         //call CLOSE => f;
@@ -125,25 +98,36 @@ do
     */
     call READ => (buf, 1, flen, f);
     buf[flen] = '\0';
-    var int ret = (call LUAL_DOSTRING => (l, buf));
+    //[[ dostring(@buf) ]];
+    var int ret = (call LUAL_DOSTRING => (__ceu_app:lua, buf));
     _ceu_out_assert(ret == 0);
+
+    var int ok = [[ apps~=nil ]];
+    if not ok then
+        _ceu_out_log(0, "NOOOOOOOO\n");
+        loop do end
+    end
+    var int ok = [[ links~=nil ]];
+    if not ok then
+        _ceu_out_log(0, "NOOOOOOOO\n");
+        loop do end
+    end
 end
 
-// parse 'tst4.lua'
+// parse 'tst5.lua'
 do
-    // lua was loaded here
-    [[ assert(apps.lua).pointer = @lua ]];
-
     // load apps
     [[ apps = apps or {} ]];
     [[ app = nil ]];
     loop do
-        [[ app, t = next(apps, k) ]];
-        var bool nxt? = [[ app~=nil ]];
-        if not nxt? then
+        [[ app, t = next(apps, app) ]];
+        var bool no? = [[ app==nil ]];
+        if no? then
+_ceu_out_log(0, "999\n");
             break;
         end
-        [[ assert(type(t) == 'table') ]];
+_ceu_out_log(0, "555\n");
+        //[[ assert(type(t) == 'table') ]];
 
         var bool src? = [[ type(t.source)=='string' ]];
         if src? then
@@ -162,7 +146,7 @@ do
     var int n = [[ (links and #links) or 0 ]];
     loop i in n do
         [[ lnk = links[@i+1] ]];
-        [[ assert(type(lnk)=='table' and #lnk==4) ]];
+        //[[ assert(type(lnk)=='table' and #lnk==4) ]];
 
         // app1,evt1 , app2,evt2
         var _tceu_app* app1 = [[ lnk[1] ]];
@@ -177,12 +161,12 @@ do
     [[ apps = apps or {} ]];
     [[ app = nil ]];
     loop do
-        [[ app, t = next(apps, k) ]];
+        [[ app, t = next(apps, app) ]];
         var bool nxt? = [[ app~=nil ]];
         if not nxt? then
             break;
         end
-        [[ assert(type(t) == 'table') ]];
+        //[[ assert(type(t) == 'table') ]];
 
         var bool src? = [[ type(t.source)=='string' ]];
         if src? then

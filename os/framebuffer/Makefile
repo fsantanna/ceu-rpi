@@ -2,6 +2,10 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
+ifdef LUA
+ceuoslua = --os-lua
+endif
+
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
@@ -14,7 +18,7 @@ CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 LDFLAGS_ONE = -Wl,-T../one.ld
 
 all:
-	ceu framebuffer.ceu --os --verbose \
+	ceu framebuffer.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_framebuffer.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -25,7 +29,7 @@ all:
 	$(ARMGNU)-objcopy _ceu_framebuffer.elf -O binary framebuf.app
 	$(ARMGNU)-objcopy _ceu_framebuffer.elf --change-addresses=0x110000 -O ihex _ceu_framebuffer.hex
 	###
-	ceu tst.ceu --os --verbose \
+	ceu tst.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_tst.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

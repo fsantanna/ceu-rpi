@@ -21,7 +21,7 @@ if f == null then
 end
 
 var int flen = (call SIZE => f);
-var char[5000] buf;
+var char[10000] buf;
 /*
 var char* buf;
 finalize

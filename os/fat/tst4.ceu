@@ -26,14 +26,24 @@ output (_lua_State* l, int index)=>int LUA_NEXT;
 output (_lua_State* l, int index, char* k)=>void LUA_GETFIELD;
 output (_lua_State* l, int index)=>char* LUA_TOSTRING;
 output (_lua_State* l, char* str)=>int LUAL_DOSTRING;
-output (_lua_State *l, int index)=>int LUA_TYPE;
-output (_lua_State *l, int n)=>void LUA_POP;
-output (_lua_State *l, void *p)=>void LUA_PUSHLIGHTUSERDATA;
-output (_lua_State *l, int index, char *k)=>void LUA_SETFIELD;
-output (_lua_State *l, int index)=>int LUA_OBJLEN;
-output (_lua_State *l, int index, int n)=>void LUA_RAWGETI;
-output (_lua_State *l)=>int LUA_GETTOP;
-output (_lua_State *l, int index)=>void* LUA_TOLIGHTUSERDATA;
+output (_lua_State* l, int index)=>int LUA_TYPE;
+output (_lua_State* l, int n)=>void LUA_POP;
+output (_lua_State* l, void *p)=>void LUA_PUSHLIGHTUSERDATA;
+output (_lua_State* l, int index, char *k)=>void LUA_SETFIELD;
+output (_lua_State* l, int index)=>int LUA_OBJLEN;
+output (_lua_State* l, int index, int n)=>void LUA_RAWGETI;
+output (_lua_State* l)=>int LUA_GETTOP;
+output (_lua_State* l, int index)=>void* LUA_TOLIGHTUSERDATA;
+output (_lua_State* l, char* str)=>int LUAL_LOADSTRING;
+output (_lua_State* l)=>int LUA_ERROR;
+output (_lua_State* l, int index)=>int LUA_ISNUMBER;
+output (_lua_State* l, int index)=>int LUA_ISBOOLEAN;
+output (_lua_State* l, int index)=>int LUA_ISSTRING;
+output (_lua_State* l, int index)=>int LUA_ISLIGHTUSERDATA;
+output (_lua_State* l, int index)=>int LUA_TOBOOLEAN;
+output (_lua_State* l, int index)=>void* LUA_TOUSERDATA;
+output (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL;
+
 
         // TODO: pure
 function (char* path)=>_tceu_app* app_load do

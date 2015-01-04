@@ -2,6 +2,10 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
+ifdef LUA
+ceuoslua = --os-lua
+endif
+
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
@@ -15,14 +19,6 @@ CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 CFLAGS_ONE += -fno-zero-initialized-in-bss
 
 LDFLAGS_ONE = -Wl,-T../one.ld
-
-CFLAGS_FAT = -pedantic -pedantic-errors \
-		 -nostartfiles -ffreestanding \
-		 -Wall -Wextra -Wshadow \
-		 -std=gnu99 \
-		 -I. -DBUILDING_RPIBOOT \
-		 -include config.h \
-		$(CFLAGS_ONE)
 
 tst1: lua kernel
 	ceu tst1.ceu --os --verbose \
@@ -53,11 +49,9 @@ main:
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -Ilua-5.1.5/src/ -c main.c -o main.o
 	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o main.o \
-				-T $(CEUDIR)/kernel.ld -o kernel.elf \
-				-L lua-5.1.5/src -llua \
-				-L /usr/lib/arm-none-eabi/newlib \
-				-L $(CEUDIR)/../newlib-1.20.0/arm-none-eabi/newlib -lc \
-				-L /usr/lib/gcc/arm-none-eabi/4.8.2 -lgcc
+		-T $(CEUDIR)/kernel.ld -o kernel.elf \
+		-L ../musl/lib -L lua-5.1.5/src -llua -lc \
+		-L /usr/lib/gcc/arm-none-eabi/4.8.2 -lgcc
 	###
 	#! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
 	#! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
@@ -68,7 +62,7 @@ main:
 
 lua:
 	cd lua-5.1.5/ && make generic && cd -
-	ceu lua.ceu --os --verbose \
+	ceu lua.ceu --os $(ceuoslua) --verbose \
 				--out-c _ceu_lua.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

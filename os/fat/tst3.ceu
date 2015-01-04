@@ -11,7 +11,7 @@ output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
 
 // LED
 
-var char[5000] buf_led;
+var char[10000] buf_led;
 do
     var _FILE[] f;
     //finalize
@@ -49,7 +49,7 @@ end
 // UART
 
 var _tceu_app[] uart;
-var char[5000] buf_uart;
+var char[10000] buf_uart;
 do
     var _FILE[] f;
     //finalize
@@ -84,7 +84,7 @@ end
 
 // UART_TST
 var _tceu_app[] uart_tst;
-var char[5000] buf_uart_tst;
+var char[10000] buf_uart_tst;
 do
     var _FILE[] f;
     //finalize
