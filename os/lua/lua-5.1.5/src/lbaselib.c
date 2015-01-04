@@ -28,6 +28,7 @@
 ** model but changing `fputs' to put the strings at a proper place
 ** (a console window or a log file, for instance).
 */
+#if 0
 static int luaB_print (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
   int i;
@@ -48,6 +49,7 @@ static int luaB_print (lua_State *L) {
   fputs("\n", stdout);
   return 0;
 }
+#endif
 
 
 static int luaB_tonumber (lua_State *L) {
@@ -282,10 +284,12 @@ static int luaB_loadstring (lua_State *L) {
 }
 
 
+#if 0
 static int luaB_loadfile (lua_State *L) {
   const char *fname = luaL_optstring(L, 1, NULL);
   return load_aux(L, luaL_loadfile(L, fname));
 }
+#endif
 
 
 /*
@@ -322,6 +326,7 @@ static int luaB_load (lua_State *L) {
 }
 
 
+#if 0
 static int luaB_dofile (lua_State *L) {
   const char *fname = luaL_optstring(L, 1, NULL);
   int n = lua_gettop(L);
@@ -329,6 +334,7 @@ static int luaB_dofile (lua_State *L) {
   lua_call(L, 0, LUA_MULTRET);
   return lua_gettop(L) - n;
 }
+#endif
 
 
 static int luaB_assert (lua_State *L) {
@@ -447,17 +453,23 @@ static int luaB_newproxy (lua_State *L) {
 static const luaL_Reg base_funcs[] = {
   {"assert", luaB_assert},
   {"collectgarbage", luaB_collectgarbage},
+#if 0
   {"dofile", luaB_dofile},
+#endif
   {"error", luaB_error},
   {"gcinfo", luaB_gcinfo},
   {"getfenv", luaB_getfenv},
   {"getmetatable", luaB_getmetatable},
+#if 0
   {"loadfile", luaB_loadfile},
+#endif
   {"load", luaB_load},
   {"loadstring", luaB_loadstring},
   {"next", luaB_next},
   {"pcall", luaB_pcall},
+#if 0
   {"print", luaB_print},
+#endif
   {"rawequal", luaB_rawequal},
   {"rawget", luaB_rawget},
   {"rawset", luaB_rawset},

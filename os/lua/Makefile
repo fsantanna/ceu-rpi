@@ -44,14 +44,17 @@ main:
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE)
 	cd lua-5.1.5/ && make generic && cd -
 	$(ARMGNU)-as vectors.s -o vectors.o
-	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/syscalls.c -o syscalls.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(CFLAGS) -c other.c -o other.o
+	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -Ilua-5.1.5/src/ -c main.c -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o main.o \
+	$(ARMGNU)-ld vectors.o other.o ceu_log.o main.o \
 		-T $(CEUDIR)/kernel.ld -o kernel.elf \
-		-L ../musl/lib -L lua-5.1.5/src -llua -lc \
+		-L lua-5.1.5/src -llua \
+		-L /usr/lib/arm-none-eabi/newlib.old -lc -lm \
 		-L /usr/lib/gcc/arm-none-eabi/4.8.2 -lgcc
+		#-L ../musl/lib -lc
+		#-L /usr/lib/arm-none-eabi/newlib.old -lc -lm
 	###
 	#! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
 	#! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"

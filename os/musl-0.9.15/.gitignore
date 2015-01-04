@@ -1,0 +1,6 @@
+*.a
+config.mak
+arch/arm/bits/alltypes.h
+include/bits
+lib/musl-gcc.specs
+tools/musl-gcc

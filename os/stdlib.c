@@ -21,7 +21,7 @@ void* realloc (void* ptr, size_t size) {
             }
             return ret;
         } else {
-            ceu_log(0,"=== NO MEMORY ===\n");
+            ceu_log(0, "==> NO MEMORY\n");
             return NULL;
         }
     } else {
