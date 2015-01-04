@@ -16,7 +16,7 @@ long a64l(const char *s)
 
 char *l64a(long x0)
 {
-	static char s[7];
+    static char s[7] = {0};
 	char *p;
 	uint32_t x = x0;
 	for (p=s; x; p++, x>>=6)

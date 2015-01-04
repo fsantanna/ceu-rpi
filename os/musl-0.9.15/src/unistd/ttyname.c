@@ -4,7 +4,7 @@
 
 char *ttyname(int fd)
 {
-	static char buf[TTY_NAME_MAX];
+    static char buf[TTY_NAME_MAX] = {0};
 	int result;
 	if ((result = ttyname_r(fd, buf, sizeof buf))) {
 		errno = result;

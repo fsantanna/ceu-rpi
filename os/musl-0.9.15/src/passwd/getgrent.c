@@ -1,6 +1,6 @@
 #include "pwf.h"
 
-static FILE *f;
+static FILE *f = NULL;
 
 void setgrent()
 {
@@ -12,8 +12,8 @@ weak_alias(setgrent, endgrent);
 
 struct group *getgrent()
 {
-	static char *line, **mem;
-	static struct group gr;
+    static char *line=NULL, **mem=NULL;
+    static struct group gr = {0};
 	size_t size=0, nmem=0;
 	if (!f) f = fopen("/etc/group", "rbe");
 	if (!f) return 0;

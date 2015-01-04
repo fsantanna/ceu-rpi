@@ -6,7 +6,7 @@
 
 struct hostent *gethostbyaddr(const void *a, socklen_t l, int af)
 {
-	static struct hostent *h;
+    static struct hostent *h = { 0 };
 	size_t size = 63;
 	struct hostent *res;
 	int err;

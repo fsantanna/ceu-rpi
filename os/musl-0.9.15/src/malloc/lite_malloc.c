@@ -10,9 +10,9 @@ uintptr_t __brk(uintptr_t);
 
 void *__simple_malloc(size_t n)
 {
-	static uintptr_t cur, brk;
-	uintptr_t base, new;
-	static int lock[2];
+    static uintptr_t cur=NULL, brk=NULL;
+    uintptr_t base=NULL, new=NULL;
+    static int lock[2] = {0};
 	size_t align=1;
 
 	if (!n) n++;

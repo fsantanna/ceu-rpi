@@ -11,7 +11,7 @@
 
 char *tempnam(const char *dir, const char *pfx)
 {
-	static int index;
+    static int index = 0;
 	char *s;
 	struct timespec ts;
 	int pid = getpid();

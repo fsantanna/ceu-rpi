@@ -11,7 +11,7 @@ void __restore(), __restore_rt();
 static pthread_t dummy(void) { return 0; }
 weak_alias(dummy, __pthread_self_def);
 
-static unsigned long handler_set[_NSIG/(8*sizeof(long))];
+static unsigned long handler_set[_NSIG/(8*sizeof(long))] = {0};
 
 void __get_handler_set(sigset_t *set)
 {

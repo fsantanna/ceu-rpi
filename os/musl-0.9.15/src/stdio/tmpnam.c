@@ -11,8 +11,8 @@
 
 char *tmpnam(char *s)
 {
-	static int index;
-	static char s2[L_tmpnam];
+    static int index = 0;
+    static char s2[L_tmpnam] = {0};
 	struct timespec ts;
 	int try = 0;
 	unsigned n;

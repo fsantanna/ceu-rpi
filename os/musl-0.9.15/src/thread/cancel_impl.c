@@ -69,7 +69,7 @@ static void init_cancellation()
 
 int pthread_cancel(pthread_t t)
 {
-	static int init;
+    static int init = 0;
 	if (!init) {
 		init_cancellation();
 		init = 1;

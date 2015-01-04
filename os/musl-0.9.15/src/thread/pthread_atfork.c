@@ -6,9 +6,9 @@ static struct atfork_funcs {
 	void (*parent)(void);
 	void (*child)(void);
 	struct atfork_funcs *prev, *next;
-} *funcs;
+} *funcs = NULL;
 
-static int lock[2];
+static int lock[2] = {0};
 
 void __fork_handler(int who)
 {

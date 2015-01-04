@@ -19,8 +19,8 @@ static struct {
 	ino_t ino;
 	sem_t *sem;
 	int refcnt;
-} *semtab;
-static int lock[2];
+} *semtab = NULL;
+static int lock[2] = {0};
 
 #define FLAGS (O_RDWR|O_NOFOLLOW|O_CLOEXEC|O_NONBLOCK)
 

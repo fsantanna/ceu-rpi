@@ -1,6 +1,6 @@
 #include "pwf.h"
 
-static FILE *f;
+static FILE *f = NULL;
 
 void setpwent()
 {
@@ -12,8 +12,8 @@ weak_alias(setpwent, endpwent);
 
 struct passwd *getpwent()
 {
-	static char *line;
-	static struct passwd pw;
+    static char *line = NULL;
+    static struct passwd pw = {0};
 	size_t size=0;
 	if (!f) f = fopen("/etc/passwd", "rbe");
 	if (!f) return 0;

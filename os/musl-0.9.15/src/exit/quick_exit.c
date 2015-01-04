@@ -8,7 +8,7 @@ weak_alias(dummy, __funcs_on_quick_exit);
 
 _Noreturn void quick_exit(int code)
 {
-	static int lock;
+    static int lock = 0;
 	while (a_swap(&lock, 1)) __syscall(SYS_pause);
 	__funcs_on_quick_exit();
 	_Exit(code);

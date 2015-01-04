@@ -8,7 +8,7 @@
  * aio operation finishes and have aio_suspend re-evaluate the completion
  * status of each aiocb it was waiting on. */
 
-static volatile int seq;
+static volatile int seq = 0;
 
 void __aio_wake(void)
 {

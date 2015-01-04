@@ -3,9 +3,9 @@
 
 #define COUNT 32
 
-static void (*funcs[COUNT])(void);
-static int count;
-static int lock[2];
+static void (*funcs[COUNT])(void) = {NULL};
+static int count = 0;
+static int lock[2] = { 0 };
 
 void __funcs_on_quick_exit()
 {

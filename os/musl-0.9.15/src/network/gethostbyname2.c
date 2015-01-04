@@ -7,7 +7,7 @@
 
 struct hostent *gethostbyname2(const char *name, int af)
 {
-	static struct hostent *h;
+    static struct hostent *h = NULL;
 	size_t size = 63;
 	struct hostent *res;
 	int err;

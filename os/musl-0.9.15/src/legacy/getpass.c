@@ -9,7 +9,7 @@ char *getpass(const char *prompt)
 	int fd;
 	struct termios s, t;
 	ssize_t l;
-	static char password[128];
+    static char password[128] = {0};
 
 	if ((fd = open("/dev/tty", O_RDONLY|O_NOCTTY)) < 0) fd = 0;
 

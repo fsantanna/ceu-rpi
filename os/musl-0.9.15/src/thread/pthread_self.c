@@ -25,7 +25,7 @@ static int init_main_thread()
 
 pthread_t __pthread_self_def()
 {
-	static int init, failed;
+    static int init=0, failed=0;
 	if (!init) {
 		if (failed) return 0;
 		if (init_main_thread() < 0) failed = 1;

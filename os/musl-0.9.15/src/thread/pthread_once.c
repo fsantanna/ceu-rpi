@@ -8,7 +8,7 @@ static void undo(void *control)
 
 int pthread_once(pthread_once_t *control, void (*init)(void))
 {
-	static int waiters;
+    static int waiters = 0;
 
 	/* Return immediately if init finished before */
 	if (*control == 2) return 0;

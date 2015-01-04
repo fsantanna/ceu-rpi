@@ -4,8 +4,8 @@
 
 struct spwd *getspnam(const char *name)
 {
-	static struct spwd sp;
-	static char *line;
+    static struct spwd sp = {0};
+    static char *line = NULL;
 	struct spwd *res;
 	int e;
 

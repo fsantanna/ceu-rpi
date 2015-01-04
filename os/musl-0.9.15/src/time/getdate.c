@@ -8,7 +8,7 @@ int getdate_err;
 
 struct tm *getdate(const char *s)
 {
-	static struct tm tmbuf;
+    static struct tm tmbuf = {0};
 	struct tm *ret = 0;
 	char *datemsk = getenv("DATEMSK");
 	FILE *f = 0;

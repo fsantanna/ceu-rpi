@@ -49,8 +49,8 @@ struct mntent *getmntent_r(FILE *f, struct mntent *mnt, char *linebuf, int bufle
 
 struct mntent *getmntent(FILE *f)
 {
-	static char linebuf[256];
-	static struct mntent mnt;
+    static char linebuf[256] = {0};
+    static struct mntent mnt = {0};
 	return getmntent_r(f, &mnt, linebuf, sizeof linebuf);
 }
 

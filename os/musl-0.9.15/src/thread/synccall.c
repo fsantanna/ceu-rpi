@@ -4,11 +4,11 @@
 static struct chain {
 	struct chain *next;
 	sem_t sem, sem2;
-} *head, *cur;
+} *head=NULL, *cur=NULL;
 
-static void (*callback)(void *), *context;
-static int chainlen;
-static sem_t chainlock, chaindone;
+static void (*callback)(void *)=NULL, *context=NULL;
+static int chainlen=0;
+static sem_t chainlock={0}, chaindone={0};
 
 static void handler(int sig, siginfo_t *si, void *ctx)
 {

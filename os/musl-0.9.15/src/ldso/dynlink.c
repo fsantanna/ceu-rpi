@@ -18,8 +18,8 @@
 #include "pthread_impl.h"
 #include "libc.h"
 
-static int errflag;
-static char errbuf[128];
+static int errflag = 0;
+static char errbuf[128] = { 0 };
 
 #ifdef SHARED
 
@@ -95,18 +95,18 @@ void __init_libc(char **, char *);
 
 const char *__libc_get_version(void);
 
-static struct dso *head, *tail, *ldso, *fini_head;
-static char *env_path, *sys_path;
-static unsigned long long gencnt;
-static int ssp_used;
-static int runtime;
-static int ldd_mode;
-static int ldso_fail;
-static int noload;
-static jmp_buf *rtld_fail;
-static pthread_rwlock_t lock;
-static struct debug debug;
-static size_t tls_cnt, tls_offset, tls_align = 4*sizeof(size_t);
+static struct dso *head=NULL, *tail=NULL, *ldso=NULL, *fini_head=NULL;
+static char *env_path=NULL, *sys_path=NULL;
+static unsigned long long gencnt=0;
+static int ssp_used=0;
+static int runtime=0;
+static int ldd_mode=0;
+static int ldso_fail=0;
+static int noload=0;
+static jmp_buf *rtld_fail=NULL;
+static pthread_rwlock_t lock={0};
+static struct debug debug={0};
+static size_t tls_cnt=0, tls_offset=0, tls_align = 4*sizeof(size_t);
 static pthread_mutex_t init_fini_lock = { ._m_type = PTHREAD_MUTEX_RECURSIVE };
 
 struct debug *_dl_debug_addr = &debug;

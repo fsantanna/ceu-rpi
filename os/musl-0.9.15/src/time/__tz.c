@@ -13,21 +13,21 @@ weak_alias(__timezone, timezone);
 weak_alias(__daylight, daylight);
 weak_alias(__tzname, tzname);
 
-static char std_name[TZNAME_MAX+1];
-static char dst_name[TZNAME_MAX+1];
+static char std_name[TZNAME_MAX+1] = {0};
+static char dst_name[TZNAME_MAX+1] = {0};
 const char __gmt[] = "GMT";
 
-static int dst_off;
-static int r0[5], r1[5];
+static int dst_off=0;
+static int r0[5] = {0}, r1[5] = {0};
 
-static const unsigned char *zi, *trans, *index, *types, *abbrevs, *abbrevs_end;
-static size_t map_size;
+static const unsigned char *zi=NULL, *trans=NULL, *index=NULL, *types=NULL, *abbrevs=NULL, *abbrevs_end=NULL;
+static size_t map_size=0;
 
-static char old_tz_buf[32];
+static char old_tz_buf[32] = {0};
 static char *old_tz = old_tz_buf;
 static size_t old_tz_size = sizeof old_tz_buf;
 
-static int lock[2];
+static int lock[2] = {0};
 
 static int getint(const char **p)
 {

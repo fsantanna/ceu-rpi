@@ -10,9 +10,9 @@ static struct fl
 	struct fl *next;
 	void (*f[COUNT])(void *);
 	void *a[COUNT];
-} builtin, *head;
+} builtin={0}, *head=NULL;
 
-static int lock[2];
+static int lock[2] = {};
 
 void __funcs_on_exit()
 {

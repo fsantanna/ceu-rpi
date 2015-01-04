@@ -19,9 +19,9 @@ struct elem {
 	size_t hash;
 };
 
-static size_t mask;
-static size_t used;
-static struct elem *tab;
+static size_t mask = 0;
+static size_t used = 0;
+static struct elem *tab = NULL;
 
 static size_t keyhash(char *k)
 {

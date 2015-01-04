@@ -6,7 +6,7 @@
 
 char *ctermid(char *s)
 {
-	static char s2[L_ctermid];
+    static char s2[L_ctermid] = {0};
 	int fd;
 	if (!s) s = s2;
 	*s = 0;

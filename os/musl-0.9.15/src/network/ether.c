@@ -24,7 +24,7 @@ struct ether_addr *ether_aton_r (const char *x, struct ether_addr *p_a)
 
 struct ether_addr *ether_aton (const char *x)
 {
-	static struct ether_addr a;
+    static struct ether_addr a = { 0 };
 	return ether_aton_r (x, &a);
 }
 
@@ -38,7 +38,7 @@ char *ether_ntoa_r (const struct ether_addr *p_a, char *x) {
 }
 
 char *ether_ntoa (const struct ether_addr *p_a) {
-	static char x[18];
+    static char x[18] = { 0 };
 	return ether_ntoa_r (p_a, x);
 }
 

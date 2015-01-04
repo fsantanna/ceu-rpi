@@ -37,7 +37,7 @@ static struct {
 	struct bin bins[64];
 	int brk_lock[2];
 	int free_lock[2];
-} mal;
+} mal = {0};
 
 
 #define SIZE_ALIGN (4*sizeof(size_t))
@@ -183,9 +183,9 @@ fail:
 
 static int init_malloc(size_t n)
 {
-	static int init, waiters;
-	int state;
-	struct chunk *c;
+    static int init=0, waiters=0;
+    int state=0;
+    struct chunk *c=NULL;
 
 	if (init == 2) return 0;
 

@@ -3,8 +3,8 @@
 
 struct spwd *fgetspent(FILE *f)
 {
-	static char *line;
-	static struct spwd sp;
+    static char *line = NULL;
+    static struct spwd sp = {0};
 	size_t size = 0;
 	struct spwd *res = 0;
 	int cs;

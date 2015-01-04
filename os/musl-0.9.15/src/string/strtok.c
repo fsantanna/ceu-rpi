@@ -2,7 +2,7 @@
 
 char *strtok(char *restrict s, const char *restrict sep)
 {
-	static char *p;
+    static char *p = NULL;
 	if (!s && !(s = p)) return NULL;
 	s += strspn(s, sep);
 	if (!*s) return p = 0;

@@ -1,6 +1,6 @@
 #include "stdio_impl.h"
 
-static unsigned char buf[UNGET];
+static unsigned char buf[UNGET] = {0};
 static FILE f = {
 	.buf = buf+UNGET,
 	.buf_size = 0,

@@ -4,7 +4,7 @@
 
 char *ecvt(double x, int n, int *dp, int *sign)
 {
-	static char buf[16];
+    static char buf[16] = {0};
 	char tmp[32];
 	int i, j;
 

@@ -3,7 +3,7 @@
 
 /* do we really need all these?? */
 
-static int idx;
+static int idx = 0;
 static const unsigned char protos[][6] = {
 	"\000ip",
 	"\001icmp",
@@ -29,8 +29,8 @@ void setprotoent(int stayopen)
 
 struct protoent *getprotoent(void)
 {
-	static struct protoent p;
-	static const char *aliases;
+    static struct protoent p = { 0 };
+    static const char *aliases = NULL;
 	if (!protos[idx][1]) return NULL;
 	p.p_proto = protos[idx][0];
 	p.p_name = (char *)protos[idx++]+1;

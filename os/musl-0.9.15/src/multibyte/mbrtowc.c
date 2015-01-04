@@ -10,7 +10,7 @@
 
 size_t mbrtowc(wchar_t *restrict wc, const char *restrict src, size_t n, mbstate_t *restrict st)
 {
-	static unsigned internal_state;
+    static unsigned internal_state = 0;
 	unsigned c;
 	const unsigned char *s = (const void *)src;
 	const unsigned N = n;

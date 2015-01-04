@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-static uint64_t seed;
+static uint64_t seed = 0;
 
 void srand(unsigned s)
 {

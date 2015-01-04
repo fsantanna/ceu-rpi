@@ -10,9 +10,9 @@
 #include "libc.h"
 #include "atomic.h"
 
-static int lock[2];
-static char log_ident[32];
-static int log_opt;
+static int lock[2] = {0};
+static char log_ident[32] = {0};
+static int log_opt = 0;
 static int log_facility = LOG_USER;
 static int log_mask = 0xff;
 static int log_fd = -1;

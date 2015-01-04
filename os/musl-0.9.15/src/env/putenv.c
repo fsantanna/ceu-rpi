@@ -2,7 +2,7 @@
 #include <string.h>
 
 extern char **__environ;
-char **__env_map;
+char **__env_map = NULL;
 
 int __putenv(char *s, int a)
 {
@@ -10,7 +10,7 @@ int __putenv(char *s, int a)
 	char *z = strchr(s, '=');
 	char **newenv = 0;
 	char **newmap = 0;
-	static char **oldenv;
+    static char **oldenv = NULL;
 
 	if (!z) return unsetenv(s);
 	if (z==s) return -1;

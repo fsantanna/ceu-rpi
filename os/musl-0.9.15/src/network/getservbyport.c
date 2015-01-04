@@ -3,9 +3,9 @@
 
 struct servent *getservbyport(int port, const char *prots)
 {
-	static struct servent se;
-	static long buf[32/sizeof(long)];
-	struct servent *res;
+    static struct servent se = {0};
+    static long buf[32/sizeof(long)] = {0};
+    struct servent *res = 0;
 	if (getservbyport_r(port, prots, &se, (void *)buf, sizeof buf, &res))
 		return 0;
 	return &se;

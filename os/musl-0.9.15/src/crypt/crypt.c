@@ -11,6 +11,6 @@ char *crypt(const char *key, const char *salt)
 	 * purely to meet the public API requirements of the crypt_r
 	 * function; the implementation of crypt_r uses the object
 	 * purely as a char buffer. */
-	static char buf[128];
+    static char buf[128] = {0};
 	return __crypt_r(key, salt, (struct crypt_data *)buf);
 }

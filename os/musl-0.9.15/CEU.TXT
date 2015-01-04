@@ -1,0 +1,5 @@
+> CC=arm-none-eabi-gcc CFLAGS="-fno-zero-initialized-in-bss -fpic" \
+    ./configure --disable-shared
+> make
+> arm-none-eabi-objdump -h lib/libc.a | grep ".got"
+> arm-none-eabi-objdump -h lib/libc.a | grep ".bss"

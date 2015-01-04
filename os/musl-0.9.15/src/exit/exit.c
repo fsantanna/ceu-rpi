@@ -21,7 +21,7 @@ extern void (*const __fini_array_end)() __attribute__((weak));
 
 _Noreturn void exit(int code)
 {
-	static int lock;
+    static int lock = 0;
 
 	/* If more than one thread calls exit, hang until _Exit ends it all */
 	while (a_swap(&lock, 1)) __syscall(SYS_pause);

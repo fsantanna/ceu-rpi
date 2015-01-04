@@ -36,7 +36,7 @@ int mq_notify(mqd_t mqd, const struct sigevent *sev)
 	pthread_t td;
 	int s;
 	struct sigevent sev2;
-	static const char zeros[32];
+    static const char zeros[32] = {0};
 
 	if (!sev || sev->sigev_notify != SIGEV_THREAD)
 		return syscall(SYS_mq_notify, mqd, sev);
