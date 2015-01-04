@@ -17,7 +17,8 @@ LIBS= -lm $(MYLIBS)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -nostdinc -isystem ../../../musl/include
 CFLAGS += -fno-zero-initialized-in-bss
-#CFLAGS += -fpic #-mpic-data-is-text-relative
+# TODO: comment or uncomment below
+CFLAGS += -fpic #-mpic-data-is-text-relative
 CFLAGS += -include ceu_log.h
 MYLDFLAGS=
 MYLIBS=

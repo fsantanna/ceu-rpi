@@ -20,6 +20,7 @@ CFLAGS_ONE += -fno-zero-initialized-in-bss
 
 LDFLAGS_ONE = -Wl,-T../one.ld
 
+tst1: APP=tst1.c
 tst1: lua kernel
 	ceu tst1.ceu --os --verbose \
 				--out-c _ceu_tst1.c \
@@ -29,8 +30,8 @@ tst1: lua kernel
 	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		-I lua-5.1.5/src/ \
 		_ceu_tst1.c -o _ceu_tst1.elf
-	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
+	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary tst1.app
 	$(ARMGNU)-objcopy _ceu_tst1.elf --change-addresses=0x150000 -O ihex _ceu_tst1.hex
 	###
@@ -44,11 +45,12 @@ main:
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE)
 	cd lua-5.1.5/ && make generic && cd -
 	$(ARMGNU)-as vectors.s -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c other.c -o other.o
+	#$(ARMGNU)-gcc $(CFLAGS) -c other.c -o other.o
 	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -Ilua-5.1.5/src/ -c main.c -o main.o
-	$(ARMGNU)-ld vectors.o other.o ceu_log.o main.o \
+	$(ARMGNU)-ld vectors.o ceu_log.o main.o \
+		--no-export-dynamic \
 		-T $(CEUDIR)/kernel.ld -o kernel.elf \
 		-L lua-5.1.5/src -llua \
 		-L ../musl/lib -lc \
@@ -56,8 +58,9 @@ main:
 		#-L ../musl/lib -lc
 		#-L /usr/lib/arm-none-eabi/newlib.old -lc -lm
 	###
+	! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
+	# TODO: uncomment below
 	#! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
-	#! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
 	$(ARMGNU)-objdump -S -D kernel.elf > kernel.list
 	$(ARMGNU)-size kernel.elf
 	$(ARMGNU)-objcopy kernel.elf -O binary kernel.img
@@ -71,12 +74,14 @@ lua:
 				--cpp-args "$(CFLAGS)"
 	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
 		-I lua-5.1.5/src/ \
-		other.c _ceu_lua.c -o _ceu_lua.elf \
-		-L ../musl/lib -L lua-5.1.5/src -llua -lc -lgcc
+		_ceu_lua.c -o _ceu_lua.elf \
+		-L lua-5.1.5/src -llua \
+		-L ../musl/lib -lc \
+		-lgcc
 	###
-	# TODO: got & bss
+	! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".bss"
+	# TODO: uncomment below
 	#! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".got"
-	#! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".bss"
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	$(ARMGNU)-objcopy _ceu_lua.elf -O binary lua.app
 	$(ARMGNU)-objcopy _ceu_lua.elf --change-addresses=0x110000 -O ihex _ceu_lua.hex
@@ -87,7 +92,7 @@ kernel:
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c tst1.c               -o app.o
+	$(ARMGNU)-gcc $(CFLAGS) -c $(APP)               -o app.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
 	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_log.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
