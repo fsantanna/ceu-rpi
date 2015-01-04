@@ -51,7 +51,7 @@ main:
 	$(ARMGNU)-ld vectors.o other.o ceu_log.o main.o \
 		-T $(CEUDIR)/kernel.ld -o kernel.elf \
 		-L lua-5.1.5/src -llua \
-		-L /usr/lib/arm-none-eabi/newlib.old -lc -lm \
+		-L ../musl/lib -lc \
 		-L /usr/lib/gcc/arm-none-eabi/4.8.2 -lgcc
 		#-L ../musl/lib -lc
 		#-L /usr/lib/arm-none-eabi/newlib.old -lc -lm
