@@ -98,22 +98,12 @@ do
     */
     call READ => (buf, 1, flen, f);
     buf[flen] = '\0';
-
-    // TODO
-    //[[ dostring(@buf) ]];
-    var int ret = (call LUAL_DOSTRING => (__ceu_app:lua, buf));
-    _ceu_out_assert(ret == 0);
+    [[ assert(loadstring(@buf))() ]];
 
     var int ok = [[ apps~=nil ]];
-    if not ok then
-        _ceu_out_log(0, "NOOOOOOOO\n");
-        loop do end
-    end
+    _ceu_out_assert(ok);
     var int ok = [[ links~=nil ]];
-    if not ok then
-        _ceu_out_log(0, "NOOOOOOOO\n");
-        loop do end
-    end
+    _ceu_out_assert(ok);
 end
 
 // parse 'tst5.lua'
