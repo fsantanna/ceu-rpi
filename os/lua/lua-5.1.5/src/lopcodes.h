@@ -258,7 +258,9 @@ LUAI_DATA const lu_byte luaP_opmodes[NUM_OPCODES];
 #define testTMode(m)	(luaP_opmodes[m] & (1 << 7))
 
 
+#if 0
 LUAI_DATA const char *const luaP_opnames[NUM_OPCODES+1];  /* opcode names */
+#endif
 
 
 /* number of list items to accumulate before a SETLIST instruction */

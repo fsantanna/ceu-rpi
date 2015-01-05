@@ -130,11 +130,7 @@ input (_lua_State* l, char* str)=>void PUSHSTRING do
 end
 
 input (_lua_State* l)=>void L_OPENLIBS do
-_ceu_out_log(0, "before ");
-_ceu_out_log(1, l);
-_ceu_out_log(0, "\n");
     _luaL_openlibs(l);
-_ceu_out_log(0, "after\n");
 end
 
 /*

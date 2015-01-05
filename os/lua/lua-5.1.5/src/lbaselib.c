@@ -28,7 +28,6 @@
 ** model but changing `fputs' to put the strings at a proper place
 ** (a console window or a log file, for instance).
 */
-#if 0
 static int luaB_print (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
   int i;
@@ -42,14 +41,13 @@ static int luaB_print (lua_State *L) {
     if (s == NULL)
       return luaL_error(L, LUA_QL("tostring") " must return a string to "
                            LUA_QL("print"));
-    if (i>1) fputs("\t", stdout);
-    fputs(s, stdout);
+    if (i>1) ceu_log(0, "\t");
+    ceu_log(0, s);
     lua_pop(L, 1);  /* pop result */
   }
-  fputs("\n", stdout);
+  ceu_log(0, "\n");
   return 0;
 }
-#endif
 
 
 static int luaB_tonumber (lua_State *L) {
@@ -193,7 +191,7 @@ static int luaB_gcinfo (lua_State *L) {
 
 
 static int luaB_collectgarbage (lua_State *L) {
-  static const char *const opts[] = {"stop", "restart", "collect",
+  const char *const opts[] = {"stop", "restart", "collect",
     "count", "step", "setpause", "setstepmul", NULL};
   static const int optsnum[] = {LUA_GCSTOP, LUA_GCRESTART, LUA_GCCOLLECT,
     LUA_GCCOUNT, LUA_GCSTEP, LUA_GCSETPAUSE, LUA_GCSETSTEPMUL};
@@ -450,41 +448,6 @@ static int luaB_newproxy (lua_State *L) {
 }
 
 
-static const luaL_Reg base_funcs[] = {
-  {"assert", luaB_assert},
-  {"collectgarbage", luaB_collectgarbage},
-#if 0
-  {"dofile", luaB_dofile},
-#endif
-  {"error", luaB_error},
-  {"gcinfo", luaB_gcinfo},
-  {"getfenv", luaB_getfenv},
-  {"getmetatable", luaB_getmetatable},
-#if 0
-  {"loadfile", luaB_loadfile},
-#endif
-  {"load", luaB_load},
-  {"loadstring", luaB_loadstring},
-  {"next", luaB_next},
-  {"pcall", luaB_pcall},
-#if 0
-  {"print", luaB_print},
-#endif
-  {"rawequal", luaB_rawequal},
-  {"rawget", luaB_rawget},
-  {"rawset", luaB_rawset},
-  {"select", luaB_select},
-  {"setfenv", luaB_setfenv},
-  {"setmetatable", luaB_setmetatable},
-  {"tonumber", luaB_tonumber},
-  {"tostring", luaB_tostring},
-  {"type", luaB_type},
-  {"unpack", luaB_unpack},
-  {"xpcall", luaB_xpcall},
-  {NULL, NULL}
-};
-
-
 /*
 ** {======================================================
 ** Coroutine library
@@ -496,7 +459,7 @@ static const luaL_Reg base_funcs[] = {
 #define CO_NOR	2	/* 'normal' (it resumed another coroutine) */
 #define CO_DEAD	3
 
-static const char *const statnames[] =
+static const char const statnames[][10] =
     {"running", "suspended", "normal", "dead"};
 
 static int costatus (lua_State *L, lua_State *co) {
@@ -613,7 +576,7 @@ static int luaB_corunning (lua_State *L) {
   return 1;
 }
 
-
+#if 0
 static const luaL_Reg co_funcs[] = {
   {"create", luaB_cocreate},
   {"resume", luaB_coresume},
@@ -623,6 +586,8 @@ static const luaL_Reg co_funcs[] = {
   {"yield", luaB_yield},
   {NULL, NULL}
 };
+#endif
+
 
 /* }====================================================== */
 
@@ -636,6 +601,60 @@ static void auxopen (lua_State *L, const char *name,
 
 
 static void base_open (lua_State *L) {
+  luaL_Reg base_funcs[23];
+    base_funcs[0].name = "assert";
+    base_funcs[0].func = luaB_assert;
+    base_funcs[1].name = "collectgarbage";
+    base_funcs[1].func = luaB_collectgarbage;
+#if 0
+    {"dofile", luaB_dofile},
+#endif
+    base_funcs[2].name = "error";
+    base_funcs[2].func = luaB_error;
+    base_funcs[3].name = "gcinfo";
+    base_funcs[3].func = luaB_gcinfo;
+    base_funcs[4].name = "getfenv";
+    base_funcs[4].func = luaB_getfenv;
+    base_funcs[5].name = "getmetatable";
+    base_funcs[5].func = luaB_getmetatable;
+#if 0
+    {"loadfile", luaB_loadfile},
+#endif
+    base_funcs[6].name = "load";
+    base_funcs[6].func = luaB_load;
+    base_funcs[7].name = "loadstring";
+    base_funcs[7].func = luaB_loadstring;
+    base_funcs[8].name = "next";
+    base_funcs[8].func = luaB_next;
+    base_funcs[9].name = "pcall";
+    base_funcs[9].func = luaB_pcall;
+    base_funcs[10].name = "print";
+    base_funcs[10].func = luaB_print;
+    base_funcs[11].name = "rawequal";
+    base_funcs[11].func = luaB_rawequal;
+    base_funcs[12].name = "rawget";
+    base_funcs[12].func = luaB_rawget;
+    base_funcs[13].name = "rawset";
+    base_funcs[13].func = luaB_rawset;
+    base_funcs[14].name = "select";
+    base_funcs[14].func = luaB_select;
+    base_funcs[15].name = "setfenv";
+    base_funcs[15].func = luaB_setfenv;
+    base_funcs[16].name = "setmetatable";
+    base_funcs[16].func = luaB_setmetatable;
+    base_funcs[17].name = "tonumber";
+    base_funcs[17].func = luaB_tonumber;
+    base_funcs[18].name = "tostring";
+    base_funcs[18].func = luaB_tostring;
+    base_funcs[19].name = "type";
+    base_funcs[19].func = luaB_type;
+    base_funcs[20].name = "unpack";
+    base_funcs[20].func = luaB_unpack;
+    base_funcs[21].name = "xpcall";
+    base_funcs[21].func = luaB_xpcall;
+    base_funcs[22].name = NULL;
+    base_funcs[22].func = NULL;
+
   /* set global _G */
   lua_pushvalue(L, LUA_GLOBALSINDEX);
   lua_setglobal(L, "_G");
@@ -657,9 +676,9 @@ static void base_open (lua_State *L) {
 }
 
 
-LUALIB_API int luaopen_base (lua_State *L) {
+int luaopen_base (lua_State *L) {
   base_open(L);
-  luaL_register(L, LUA_COLIBNAME, co_funcs);
+  /*luaL_register(L, LUA_COLIBNAME, co_funcs);*/
   return 2;
 }
 

@@ -11,9 +11,6 @@ CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
 CFLAGS += -nostdinc -isystem ../musl/include
-#CFLAGS += -fpic -mpic-data-is-text-relative
-#CFLAGS += -fwhole-program #-flto
-#LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 CFLAGS_ONE += -fno-zero-initialized-in-bss
@@ -31,6 +28,7 @@ tst1: lua kernel
 		-I lua-5.1.5/src/ \
 		_ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
+	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".rel"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	$(ARMGNU)-objcopy _ceu_tst1.elf -O binary tst1.app
 	$(ARMGNU)-objcopy _ceu_tst1.elf --change-addresses=0x150000 -O ihex _ceu_tst1.hex
@@ -59,6 +57,7 @@ main:
 		#-L /usr/lib/arm-none-eabi/newlib.old -lc -lm
 	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
+	! $(ARMGNU)-objdump -h kernel.elf | grep ".rel"
 	# TODO: uncomment below
 	#! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
 	$(ARMGNU)-objdump -S -D kernel.elf > kernel.list
@@ -80,6 +79,7 @@ lua:
 		-lgcc
 	###
 	! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".bss"
+	! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".rel"
 	# TODO: uncomment below
 	#! $(ARMGNU)-objdump -h _ceu_lua.elf | grep ".got"
 	! strings -a _ceu_lua.elf | grep libc | grep newlib

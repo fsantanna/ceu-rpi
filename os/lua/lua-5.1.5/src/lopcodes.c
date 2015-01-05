@@ -13,6 +13,7 @@
 
 /* ORDER OP */
 
+#if 0
 const char *const luaP_opnames[NUM_OPCODES+1] = {
   "MOVE",
   "LOADK",
@@ -54,6 +55,7 @@ const char *const luaP_opnames[NUM_OPCODES+1] = {
   "VARARG",
   NULL
 };
+#endif
 
 
 #define opmode(t,a,b,c,m) (((t)<<7) | ((a)<<6) | ((b)<<4) | ((c)<<2) | (m))

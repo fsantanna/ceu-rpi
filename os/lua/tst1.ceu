@@ -7,24 +7,115 @@ native @nohold _ceu_out_log();
 output (void)=>_lua_State* LUA_NEW;
 output (_lua_State* l, _lua_Number v)=>void LUA_PUSHNUMBER;
 output (_lua_State* l, int index)=>int LUA_TONUMBER;
+output (_lua_State* l, char* name)=>void LUA_GETGLOBAL;
+output (_lua_State* l)=>void LUA_PUSHNIL;
+output (_lua_State* l, int index)=>int LUA_NEXT;
+output (_lua_State* l, int index, char* k)=>void LUA_GETFIELD;
+output (_lua_State* l, int index)=>char* LUA_TOSTRING;
+output (_lua_State* l, char* str)=>int LUAL_DOSTRING;
+output (_lua_State* l, int index)=>int LUA_TYPE;
+output (_lua_State* l, int n)=>void LUA_POP;
+output (_lua_State* l, void *p)=>void LUA_PUSHLIGHTUSERDATA;
+output (_lua_State* l, int index, char *k)=>void LUA_SETFIELD;
+output (_lua_State* l, int index)=>int LUA_OBJLEN;
+output (_lua_State* l, int index, int n)=>void LUA_RAWGETI;
+output (_lua_State* l)=>int LUA_GETTOP;
+output (_lua_State* l, int index)=>void* LUA_TOLIGHTUSERDATA;
+output (_lua_State* l, char* str)=>int LUAL_LOADSTRING;
+output (_lua_State* l)=>int LUA_ERROR;
+output (_lua_State* l, int index)=>int LUA_ISNUMBER;
+output (_lua_State* l, int index)=>int LUA_ISBOOLEAN;
+output (_lua_State* l, int index)=>int LUA_ISSTRING;
+output (_lua_State* l, int index)=>int LUA_ISLIGHTUSERDATA;
+output (_lua_State* l, int index)=>int LUA_TOBOOLEAN;
+output (_lua_State* l, int index)=>void* LUA_TOUSERDATA;
+output (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL;
+output (_lua_State* l, char* str)=>void LUA_PUSHSTRING;
+output (_lua_State* l)=>void LUAL_OPENLIBS;
+
+/*
+output LUA_NEW        : (void)                         => _lua_State*;
+output LUA_PUSHNUMBER : (_lua_State* l, _lua_Number v) => void;
+output LUA_TONUMBER   : (_lua_State* l, int index)     => int;
+*/
+
+_ceu_out_log(0, "Starting...\n");
 
 var _lua_State* l = (call LUA_NEW);
 call LUA_PUSHNUMBER => (l, 10);
 var int v = (call LUA_TONUMBER => (l, -1));
 
-await 1s;
-
 if v == 10 then
-    _ceu_out_log("OK!!!\n");
-    #define GPFSEL1 ((uint*)0x20200004)
-    #define GPSET0  ((uint*)0x2020001C)
-    #define GPCLR0  ((uint*)0x20200028)
-    var uint ra;
-    ra = *GPFSEL1;
-    ra = ra & ~(7<<18);
-    ra = ra | 1<<18;
-    *GPFSEL1 = ra;
-    *GPCLR0 = 1<<16;   // GPIO16 on
-    _ceu_out_assert(0);
+    _ceu_out_log(0, "OK-1\n");
+else
+    _ceu_out_log(0, "NO-1\n");
 end
 
+var int err = (call LUAL_LOADSTRING => (l, "return 2\n"));
+if err then
+    var char* str = (call LUA_TOSTRING => (l,-1));
+    _ceu_out_log(0, str);
+    _ceu_out_log(0, "\nNO-2\n");
+else
+    //lua_dump(l, l_writer, NULL);
+    err = (call LUA_PCALL => (l, 0, _LUA_MULTRET, 0));
+    if err then
+        var char* str = (call LUA_TOSTRING => (l,-1));
+        _ceu_out_log(0, str);
+        _ceu_out_log(0, "\nNO-2\n");
+    else
+        var int v = (call LUA_TONUMBER => (l, -1));
+        if v == 2 then
+            _ceu_out_log(0, "OK-2\n");
+        else
+            _ceu_out_log(0, "\nNO-2\n");
+        end
+    end
+end
+
+call LUAL_OPENLIBS => l;
+err = (call LUAL_LOADSTRING => (l, "return next { k=10 }\n"));
+if err then
+    var char* str = (call LUA_TOSTRING => (l,-1));
+    _ceu_out_log(0, str);
+    _ceu_out_log(0, "\nNO-3\n");
+else
+    //lua_dump(l, l_writer, NULL);
+    err = (call LUA_PCALL => (l, 0, _LUA_MULTRET, 0));
+    if err then
+        var char* str = (call LUA_TOSTRING => (l,-1));
+        _ceu_out_log(0, str);
+        _ceu_out_log(0, "\nNO-3\n");
+    else
+        var int v = (call LUA_TONUMBER => (l, -1));
+        if v == 10 then
+            var char* str = (call LUA_TOSTRING => (l,-2));
+            if str[0] == 'k' then
+                _ceu_out_log(0, "OK-3\n");
+            else
+                _ceu_out_log(0, "\nNO-3\n");
+            end
+        else
+            _ceu_out_log(0, "\nNO-3\n");
+        end
+    end
+end
+
+err = (call LUAL_LOADSTRING => (l, "print('1=', 1, nil, '2=',2)"));
+if err then
+    var char* str = (call LUA_TOSTRING => (l,-1));
+    _ceu_out_log(0, str);
+    _ceu_out_log(0, "\nNO-4\n");
+else
+    //lua_dump(l, l_writer, NULL);
+    err = (call LUA_PCALL => (l, 0, _LUA_MULTRET, 0));
+    if err then
+        var char* str = (call LUA_TOSTRING => (l,-1));
+        _ceu_out_log(0, str);
+        _ceu_out_log(0, "\nNO-4\n");
+    else
+        _ceu_out_log(0, "OK-4\n");
+    end
+end
+
+await FOREVER;
