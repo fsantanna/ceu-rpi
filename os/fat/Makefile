@@ -11,7 +11,7 @@ CFLAGS += -fno-zero-initialized-in-bss
 
 CFLAGS_KERNEL = $(CFLAGS) $(CEUOSLUA)
 
-CFLAGS_APP = -fpic -mpic-data-is-text-relative
+CFLAGS_APP = -fpic #-mpic-data-is-text-relative
 CFLAGS_APP += -fno-zero-initialized-in-bss
 LDFLAGS_APP = -Wl,-T../app.ld
 

@@ -18,7 +18,7 @@ output (_FILE* f)=>int SIZE;
 output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
 
 output (void)=>_lua_State* LUA_NEW;
-output (_lua_State* l, _lua_Number v)=>void LUA_PUSHNUMBER;
+output (_lua_State* l, int v)=>void LUA_PUSHNUMBER;
 output (_lua_State* l, int index)=>int LUA_TONUMBER;
 output (_lua_State* l, char* name)=>void LUA_GETGLOBAL;
 output (_lua_State* l)=>void LUA_PUSHNIL;
@@ -98,6 +98,8 @@ do
     */
     call READ => (buf, 1, flen, f);
     buf[flen] = '\0';
+
+    // TODO
     //[[ dostring(@buf) ]];
     var int ret = (call LUAL_DOSTRING => (__ceu_app:lua, buf));
     _ceu_out_assert(ret == 0);
@@ -123,11 +125,9 @@ do
         [[ app, t = next(apps, app) ]];
         var bool no? = [[ app==nil ]];
         if no? then
-_ceu_out_log(0, "999\n");
             break;
         end
-_ceu_out_log(0, "555\n");
-        //[[ assert(type(t) == 'table') ]];
+        [[ assert(type(t) == 'table') ]];
 
         var bool src? = [[ type(t.source)=='string' ]];
         if src? then
@@ -146,12 +146,12 @@ _ceu_out_log(0, "555\n");
     var int n = [[ (links and #links) or 0 ]];
     loop i in n do
         [[ lnk = links[@i+1] ]];
-        //[[ assert(type(lnk)=='table' and #lnk==4) ]];
+        [[ assert(type(lnk)=='table' and #lnk==4) ]];
 
         // app1,evt1 , app2,evt2
-        var _tceu_app* app1 = [[ lnk[1] ]];
+        var _tceu_app* app1 = [[ lnk[1].pointer ]];
         var int evt1 = [[ lnk[2] ]];
-        var _tceu_app* app2 = [[ lnk[3] ]];
+        var _tceu_app* app2 = [[ lnk[3].pointer ]];
         var int evt2 = [[ lnk[4] ]];
 
         _ceu_out_link(app1,evt1 , app2,evt2);
@@ -166,7 +166,7 @@ _ceu_out_log(0, "555\n");
         if not nxt? then
             break;
         end
-        //[[ assert(type(t) == 'table') ]];
+        [[ assert(type(t) == 'table') ]];
 
         var bool src? = [[ type(t.source)=='string' ]];
         if src? then

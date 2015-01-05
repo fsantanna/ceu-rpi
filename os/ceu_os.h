@@ -443,7 +443,7 @@ typedef struct tceu_go {
 #define stack_pop(go) \
     go.stki--
 
-#ifdef CEU_DEBUG
+#if defined(CEU_DEBUG) && !defined(CEU_OS)
 #define stack_push(go,elem)             \
     ceu_out_assert((go).stki+1 < CEU_MAX_STACK);  \
     (go).stk[++((go).stki)] = elem

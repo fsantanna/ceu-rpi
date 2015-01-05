@@ -22,7 +22,7 @@ input (void)=>_lua_State* NEW do
     return _lua_newstate(_l_alloc, __ceu_app);
 end
 
-input (_lua_State* l, _lua_Number v)=>void PUSHNUMBER do
+input (_lua_State* l, int v)=>void PUSHNUMBER do
     _lua_pushnumber(l, v);
 end
 
