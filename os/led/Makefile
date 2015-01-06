@@ -3,38 +3,30 @@ SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
 CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_OS -I $(CEUDIR)
+CFLAGS += -DCEU_DEBUG -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS += -fno-zero-initialized-in-bss
-#CFLAGS += -fwhole-program #-flto
-#LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
-CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
-LDFLAGS_ONE = -Wl,-T../app.ld
-#LDFLAGS_ONE = -Wl,--section-start=.export=0x00
-# -Wl,--section-start=.text=0x10 -Wl,--section-start=.data=0x200
-#LDFLAGS_ONE = -Wl,-T../kernel.ld -Wl,--image-base
+CFLAGS_KERNEL = $(CFLAGS) -DCEU_OS_KERNEL $(CEUOSLUAIFC) -DCEU_NOSTDLIB
+
+CFLAGS_APP  = $(CFLAGS) -DCEU_OS_APP
+CFLAGS_APP += -fpic #-mpic-data-is-text-relative
+CFLAGS_APP += -fno-zero-initialized-in-bss
+LDFLAGS_APP = -Wl,-T../app.ld
 
 all: led
 	$(ARMGNU)-objcopy _ceu_led.elf --change-addresses=0x110000 -O ihex _ceu_led.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -include $(CEUDIR)/ceu_log.h -c $(CEUDIR)/ceu_os.c -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -include $(CEUDIR)/ceu_log.h -c $(CEUDIR)/ceu_os.c -o ceu_os.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c tst.c                -o app.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/main.c     -o main.o
 	$(ARMGNU)-ld vectors.o ceu_log.o stdlib.o ceu_pool.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
-	#$(ARMGNU)-gcc -g $(CFLAGS)
-				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s
-				  #$(CEUDIR)/main.c $(CEUDIR)/stdlib.c
-				  #tst.c _ceu_tst.c
-				  #-o kernel.o
-	#$(ARMGNU)-objdump -S -D kernel.o > /tmp/kernel.list
-	#$(ARMGNU)-ld $(LDFLAGS) kernel.o -o kernel.elf
-	#TODO
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".bss"
 	$(ARMGNU)-objdump -S -D kernel.elf > kernel.list
@@ -52,7 +44,7 @@ led:
 				--out-c _ceu_led.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) _ceu_led.c -o _ceu_led.elf
+	$(ARMGNU)-gcc $(CFLAGS_APP) $(LDFLAGS_APP) _ceu_led.c -o _ceu_led.elf
 	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_led.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_led.elf -O binary led.app

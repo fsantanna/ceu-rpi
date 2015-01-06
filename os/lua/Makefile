@@ -2,20 +2,27 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
-ifdef LUA
-ceuoslua = --os-lua
-endif
-
 CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
+CFLAGS += -DCEU_DEBUG -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
-CFLAGS += -fno-zero-initialized-in-bss
 CFLAGS += -nostdinc -isystem ../musl/include
+CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
+CFLAGS += -fno-zero-initialized-in-bss
 
-CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
-CFLAGS_ONE += -fno-zero-initialized-in-bss
+CFLAGS_KERNEL = $(CFLAGS) -DCEU_OS_KERNEL $(CEUOSLUAIFC) -DCEU_NOSTDLIB
 
-LDFLAGS_ONE = -Wl,-T../app.ld
+CFLAGS_APP  = $(CFLAGS) -DCEU_OS_APP
+CFLAGS_APP += -fpic #-mpic-data-is-text-relative
+CFLAGS_APP += -fno-zero-initialized-in-bss
+LDFLAGS_APP = -Wl,-T../app.ld
+
+CFLAGS_FAT = -pedantic -pedantic-errors \
+		 -nostdlib -nostartfiles -ffreestanding \
+		 -Wall -Wextra -Wshadow \
+		 -std=gnu99 \
+		 -I. -DBUILDING_RPIBOOT \
+		 -include config.h \
+		$(CFLAGS_APP)
 
 tst1: APP=tst1.c
 tst1: lua kernel
@@ -24,7 +31,7 @@ tst1: lua kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst1.c .
-	$(ARMGNU)-gcc -I. $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+	$(ARMGNU)-gcc -I. $(CFLAGS_APP) $(LDFLAGS_APP) \
 		-I lua-5.1.5/src/ \
 		_ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
@@ -40,11 +47,8 @@ tst1: lua kernel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 main:
-	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE)
 	cd lua-5.1.5/ && make generic && cd -
 	$(ARMGNU)-as vectors.s -o vectors.o
-	#$(ARMGNU)-gcc $(CFLAGS) -c other.c -o other.o
-	#$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
 	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
 	$(ARMGNU)-gcc $(CFLAGS) -Ilua-5.1.5/src/ -c main.c -o main.o
 	$(ARMGNU)-ld vectors.o ceu_log.o main.o \
@@ -71,7 +75,7 @@ lua:
 				--out-c _ceu_lua.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
-	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
+	$(ARMGNU)-gcc $(CFLAGS_APP) $(LDFLAGS_APP) \
 		-I lua-5.1.5/src/ \
 		_ceu_lua.c -o _ceu_lua.elf \
 		-L lua-5.1.5/src -llua \
@@ -88,12 +92,12 @@ lua:
 
 kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(APP)               -o app.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(APP)               -o app.o
+	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/main.c     -o main.o
 	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_log.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	###

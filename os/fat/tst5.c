@@ -1,14 +1,13 @@
 #include "ceu_os.h"
-#include <assert.h>
 
 void MAIN (void)
 {
     tceu_app* fat = ceu_sys_load((void*)0x110000);
     tceu_app* lua = ceu_sys_load((void*)0x300000);
     tceu_app* tst = ceu_sys_load((void*)0x320000);
-    assert(fat != NULL);
-    assert(lua != NULL);
-    assert(tst != NULL);
+    ceu_sys_assert(fat != NULL);
+    ceu_sys_assert(lua != NULL);
+    ceu_sys_assert(tst != NULL);
 
     // FAT
     ceu_sys_link( tst,1  ,  fat,243 );  // OPEN

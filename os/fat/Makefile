@@ -3,25 +3,26 @@ SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
 CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
+CFLAGS += -DCEU_DEBUG -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
 CFLAGS += -fno-zero-initialized-in-bss
 
-CFLAGS_KERNEL = $(CFLAGS) $(CEUOSLUAIFC) -DCEU_NOSTDLIB
+CFLAGS_KERNEL = $(CFLAGS) -DCEU_OS_KERNEL $(CEUOSLUAIFC) -DCEU_NOSTDLIB
 
-CFLAGS_APP = -fpic #-mpic-data-is-text-relative
+CFLAGS_APP  = $(CFLAGS) -DCEU_OS_APP
+CFLAGS_APP += -fpic #-mpic-data-is-text-relative
 CFLAGS_APP += -fno-zero-initialized-in-bss
 LDFLAGS_APP = -Wl,-T../app.ld
 
 CFLAGS_FAT = -pedantic -pedantic-errors \
-		 -nostdlib -nostartfiles -ffreestanding \
-		 -Wall -Wextra -Wshadow \
-		 -std=gnu99 \
-		 -I. -DBUILDING_RPIBOOT \
-		 -include config.h \
-		$(CFLAGS_APP)
+			 -nostdlib -nostartfiles -ffreestanding \
+			 -Wall -Wextra -Wshadow \
+			 -std=gnu99 \
+			 -I. -DBUILDING_RPIBOOT \
+			 -include config.h \
+			 -fpic -fno-zero-initialized-in-bss
 
 tst1: APP=tst1.c
 tst1: fat kernel
@@ -30,7 +31,7 @@ tst1: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst1.c .
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
@@ -51,7 +52,7 @@ tst2: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst2.c .
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_tst2.c -o _ceu_tst2.elf
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".bss"
@@ -74,7 +75,7 @@ tst3: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst3.c .
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_tst3.c -o _ceu_tst3.elf
 	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".bss"
@@ -99,7 +100,7 @@ tst4: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst4.c .
 	$(ARMGNU)-gcc -Ilib/ -I../lua/lua-5.1.5/src/ \
-		$(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+		$(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_tst4.c -o _ceu_tst4.elf
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_tst4.elf | grep ".got"
@@ -128,7 +129,7 @@ tst5: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst5.c .
 	$(ARMGNU)-gcc -Ilib/ -I../lua/lua-5.1.5/src/ \
-		$(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+		$(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_tst5.c -o _ceu_tst5.elf -L ../musl/lib -lc
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_tst5.elf | grep ".got"
@@ -160,7 +161,7 @@ init: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_init.c .
 	$(ARMGNU)-gcc -Ilib/ -I../lua/lua-5.1.5/src/ \
-		$(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+		$(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_init.c -o _ceu_init.elf -L ../musl/lib -lc
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".got"
@@ -202,7 +203,7 @@ fat:
 		lib/timer.o lib/mmio.o lib/boot.o lib/mbox.o lib/stdlib.o lib/heap.o \
 		lib/malloc.o lib/printf.o
 	# all
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS) $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
 		_ceu_fat.c -o _ceu_fat.elf -L. -lfat -lgcc
 		# main.o
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_FAT) $(LDFLAGS_APP)
