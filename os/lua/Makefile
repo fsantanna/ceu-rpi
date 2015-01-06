@@ -15,7 +15,7 @@ CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 CFLAGS_ONE += -fno-zero-initialized-in-bss
 
-LDFLAGS_ONE = -Wl,-T../one.ld
+LDFLAGS_ONE = -Wl,-T../app.ld
 
 tst1: APP=tst1.c
 tst1: lua kernel

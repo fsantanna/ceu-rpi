@@ -11,7 +11,7 @@ CFLAGS += -fno-zero-initialized-in-bss
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
-LDFLAGS_ONE = -Wl,-T../one.ld
+LDFLAGS_ONE = -Wl,-T../app.ld
 
 all: uart tst
 	$(ARMGNU)-objcopy _ceu_uart.elf --change-addresses=0x110000 -O ihex _ceu_uart.hex
