@@ -13,24 +13,33 @@ int dt () {
     return dt;
 }
 
-/*
-    extern uint InitialiseFrameBuffer(u32 width, u32 height, u32 bitDepth);
-    extern void SetGraphicsAddress (uint addr);
-    extern u32  DrawCharacter (char c, u32 x, u32 y);
-    extern void DrawString    (char* str, u32 length, u32 x, u32 y);
-    extern void KeyboardUpdate  (void);
-    extern char KeyboardGetChar (void);
-*/
+void ceu_sys_assert (int v) {
+    #define GPFSEL1 ((uint*)0x20200004)
+    #define GPSET0  ((uint*)0x2020001C)
+    #define GPCLR0  ((uint*)0x20200028)
+    uint ra;
+    ra = *GPFSEL1;
+    ra = ra & ~(7<<18);
+    ra = ra | 1<<18;
+    *GPFSEL1 = ra;
+    if (v == 0) {
+        volatile int i=0;
+        while (1) {
+            for (i=0; i<99999; i++);
+            *GPCLR0 = 1<<16;   // GPIO16 on
+            for (i=0; i<99999; i++);
+            *GPSET0 = 1<<16;   // GPIO16 off
+        }
+    }
+}
+
+#include "ceu_log.h"
+void ceu_sys_log (int mode, const void* s) {
+    ceu_log(mode, s);
+}
+
 void ceu_os_main ()
 {
-/*
-debug_init();
-#define FB_PITCH 1024*2
-#define FB_Bpp   2
-uint fb = InitialiseFrameBuffer(1024, 768, 16);
-SetGraphicsAddress(fb);
-DrawString("Welcome to Ceu/OS!\n", 20, 100, 100);
-*/
     ceu_os_init();
     MAIN();
     old = *TIMER_CLO;

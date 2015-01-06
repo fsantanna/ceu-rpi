@@ -13,7 +13,9 @@ void* CEU_APP_ADDR = NULL;
 
 #ifdef CEU_DEBUG
 #include <stdio.h>      /* fprintf */
+#ifndef CEU_NOSTDLIB
 #include <assert.h>     /* sys_assert */
+#endif
 #endif
 
 #if defined(CEU_DEBUG) || defined(CEU_NEWS) || defined(CEU_THREADS) || defined(CEU_OS)
@@ -41,12 +43,9 @@ void *realloc(void *ptr, size_t size);
 
 /**********************************************************************/
 
-#ifdef CEU_NEWS
-#ifdef CEU_RUNTESTS
-#define CEU_MAX_DYNS 100
-static int _ceu_dyns_ = 0;  /* check if total of alloc/free match */
-#endif
-#endif
+#ifndef CEU_OS
+
+#ifndef CEU_NOSTDLIB
 
 void ceu_sys_assert (int v) {
 #ifdef CEU_DEBUG
@@ -57,16 +56,19 @@ void ceu_sys_assert (int v) {
 }
 
 void ceu_sys_log (int mode, const void* s) {
-#ifdef CEU_OS
-    ceu_log(mode, s);
-#else
     if (mode == 0) {
         fprintf(stderr, "%s", (char*)s);
     } else {
         fprintf(stderr, "%lX", (long)s);
     }
-#endif
 }
+
+#ifdef CEU_NEWS
+#ifdef CEU_RUNTESTS
+#define CEU_MAX_DYNS 100
+static int _ceu_dyns_ = 0;  /* check if total of alloc/free match */
+#endif
+#endif
 
 #if defined(CEU_NEWS) || defined(CEU_THREADS) || defined(CEU_OS)
 void* ceu_sys_realloc (void* ptr, size_t size) {
@@ -88,9 +90,10 @@ void* ceu_sys_realloc (void* ptr, size_t size) {
 }
 #endif
 
-/**********************************************************************/
+#endif /* ifndef CEU_NOSTDLIB */
 
-/* TODO: ifndef CEU_OS? */
+#endif /* ifndef CEU_OS */
+
 int CEU_REQS = 0;
 int ceu_sys_req (void) {
     CEU_REQS++;
@@ -265,7 +268,7 @@ int ceu_lua_atpanic_f (lua_State* lua) {
 /*
 */
 #endif
-    /*ceu_out_assert(0);*/
+    ceu_out_assert(0);
     return 0;
 }
 #endif
@@ -1205,19 +1208,6 @@ printf("<<< %d %d\n", app->isAlive, app->ret);
 */
 
     app->init(app);
-
-/*
-#define GPFSEL1 ((uint*)0x20200004)
-#define GPSET0  ((uint*)0x2020001C)
-#define GPCLR0  ((uint*)0x20200028)
-uint ra;
-ra = *GPFSEL1;
-ra = ra & ~(7<<18);
-ra = ra | 1<<18;
-*GPFSEL1 = ra;
-*GPCLR0 = 1<<16;   // GPIO16 on
-// *GPSET0 = 1<<16;   // GPIO16 off
-*/
 
     /* OS_START */
 

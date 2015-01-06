@@ -9,7 +9,7 @@ CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
 CFLAGS += -fno-zero-initialized-in-bss
 
-CFLAGS_KERNEL = $(CFLAGS) $(CEUOSLUAIFC)
+CFLAGS_KERNEL = $(CFLAGS) $(CEUOSLUAIFC) -DCEU_NOSTDLIB
 
 CFLAGS_APP = -fpic #-mpic-data-is-text-relative
 CFLAGS_APP += -fno-zero-initialized-in-bss
@@ -118,6 +118,7 @@ tst5: fat kernel
 	cd ../led  && make led  && cd - && cp ../led/led.app .
 	cd ../uart && make uart && cd - && cp ../uart/uart.app .
 	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
+	###
 	cd ../lua  && make lua  && cd - && cp ../lua/_ceu_lua.elf .
 	$(ARMGNU)-objcopy _ceu_lua.elf --change-addresses=0x300000 -O ihex _ceu_lua.hex
 	###
@@ -149,7 +150,8 @@ init: fat kernel
 	cd ../led  && make ceuosluaifc=--os-luaifc led  && cd - && cp ../led/led.app .
 	cd ../uart && make ceuosluaifc=--os-luaifc uart && cd - && cp ../uart/uart.app .
 	cd ../uart && make ceuosluaifc=--os-luaifc tst  && cd - && cp ../uart/tst.app uart_tst.app
-	cd ../lua  && make ceuosluaifc=--os-luaifc lua  && cd - && cp ../lua/lua.app .
+	###
+	cd ../lua  && make ceuosluaifc=--os-luaifc lua  && cd - && cp ../lua/_ceu_lua.elf .
 	$(ARMGNU)-objcopy _ceu_lua.elf --change-addresses=0x300000 -O ihex _ceu_lua.hex
 	###
 	ceu init.ceu --os $(ceuosluaifc) --verbose \

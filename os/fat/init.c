@@ -1,5 +1,4 @@
 #include "ceu_os.h"
-#include <assert.h>
 
 typedef struct {
     void *fat, *lua;
@@ -10,9 +9,9 @@ void MAIN (void)
     tceu_app* fat  = ceu_sys_load((void*)0x110000);
     tceu_app* lua  = ceu_sys_load((void*)0x300000);
     tceu_app* init = ceu_sys_load((void*)0x320000);
-    assert(fat  != NULL);
-    assert(lua  != NULL);
-    assert(init != NULL);
+    ceu_sys_assert(fat  != NULL);
+    ceu_sys_assert(lua  != NULL);
+    ceu_sys_assert(init != NULL);
 
     // FAT
     ceu_sys_link( init,1  ,  fat,243 );  // OPEN

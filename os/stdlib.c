@@ -5,7 +5,7 @@
 static char   MEM_buf[MEM_TOTAL] = {0};   /* {0} avoids .bss */
 static size_t MEM_i = 0;
 
-void* realloc (void* ptr, size_t size) {
+void* ceu_sys_realloc (void* ptr, size_t size) {
     if (size > 0) {
         size_t nxt = MEM_i + size;
         int mod = nxt % 4;  // TODO: 4 hardcoded
