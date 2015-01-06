@@ -1,0 +1,195 @@
+native/pre do
+    ##include "vfs.h"
+    ##include "lua.h"
+end
+
+native do
+    #define ceu_out_realloc_unsafe ceu_out_realloc
+    #define ceu_out_load_unsafe    ceu_out_load
+end
+
+native @nohold _ceu_out_load(), _ceu_out_log();
+native @pure _ceu_out_start(), _ceu_out_link();
+native @pure _ceu_out_load_unsafe(), _ceu_out_realloc_unsafe();
+
+output (char* path, char* mode)=>_FILE* OPEN;
+output (_FILE* f)=>int CLOSE;
+output (_FILE* f)=>int SIZE;
+output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
+
+output (void)=>_lua_State* LUA_NEW;
+output (_lua_State* l, int v)=>void LUA_PUSHNUMBER;
+output (_lua_State* l, int index)=>int LUA_TONUMBER;
+output (_lua_State* l, char* name)=>void LUA_GETGLOBAL;
+output (_lua_State* l)=>void LUA_PUSHNIL;
+output (_lua_State* l, int index)=>int LUA_NEXT;
+output (_lua_State* l, int index, char* k)=>void LUA_GETFIELD;
+output (_lua_State* l, int index)=>char* LUA_TOSTRING;
+output (_lua_State* l, char* str)=>int LUAL_DOSTRING;
+output (_lua_State* l, int index)=>int LUA_TYPE;
+output (_lua_State* l, int n)=>void LUA_POP;
+output (_lua_State* l, void *p)=>void LUA_PUSHLIGHTUSERDATA;
+output (_lua_State* l, int index, char *k)=>void LUA_SETFIELD;
+output (_lua_State* l, int index)=>int LUA_OBJLEN;
+output (_lua_State* l, int index, int n)=>void LUA_RAWGETI;
+output (_lua_State* l)=>int LUA_GETTOP;
+output (_lua_State* l, int index)=>void* LUA_TOLIGHTUSERDATA;
+output (_lua_State* l, char* str)=>int LUAL_LOADSTRING;
+output (_lua_State* l)=>int LUA_ERROR;
+output (_lua_State* l, int index)=>int LUA_ISNUMBER;
+output (_lua_State* l, int index)=>int LUA_ISBOOLEAN;
+output (_lua_State* l, int index)=>int LUA_ISSTRING;
+output (_lua_State* l, int index)=>int LUA_ISLIGHTUSERDATA;
+output (_lua_State* l, int index)=>int LUA_TOBOOLEAN;
+output (_lua_State* l, int index)=>void* LUA_TOUSERDATA;
+output (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL;
+output (_lua_State* l, char* str)=>void LUA_PUSHSTRING;
+output (_lua_State* l)=>void LUAL_OPENLIBS;
+
+        // TODO: pure
+function (char* path)=>_tceu_app* app_load do
+    var _FILE[] f = (call OPEN => (path, "r"));
+    _ceu_out_assert(f != null);
+
+    var int flen = (call SIZE => f);
+    var char[] buf = (char *)_ceu_out_realloc_unsafe(null, flen);
+    call READ => (buf, 1, flen, f);
+    call CLOSE => f;
+
+    var _tceu_app* app = _ceu_out_load_unsafe(buf);
+    _ceu_out_assert(app != null);
+    return app;
+end
+
+input (void*, void*) APPS;
+
+var void* fat, lua;
+(fat, lua) = await APPS;
+
+/*
+#define GPFSEL1 ((uint*)0x20200004)
+#define GPSET0  ((uint*)0x2020001C)
+#define GPCLR0  ((uint*)0x20200028)
+var uint ra;
+ra = *GPFSEL1;
+ra = ra & ~(7<<18);
+ra = ra | 1<<18;
+*GPFSEL1 = ra;
+*GPCLR0 = 1<<16;   // GPIO16 on
+*/
+
+// dofile 'init.lua'
+do
+    var char[1000] buf;
+    var _FILE[] f = null;
+    //finalize
+        f = (call OPEN => ("init.lua", "r"));
+    //finalize
+    //with
+        //call CLOSE => f;
+    //end
+    _ceu_out_assert(f != null);
+
+    var int flen = (call SIZE => f);
+    /*
+    var char* buf;
+    finalize
+        buf = (char *)_ceu_out_realloc(null, flen);
+    with
+        nothing;    // TODO
+    end
+    */
+    call READ => (buf, 1, flen, f);
+    buf[flen] = '\0';
+    [[ assert(loadstring(@buf))() ]];
+
+    var int ok = [[ apps~=nil ]];
+    _ceu_out_assert(ok);
+    var int ok = [[ links~=nil ]];
+    _ceu_out_assert(ok);
+end
+
+// parse 'init.lua'
+do
+    // load apps
+    [[
+        apps = apps or {}
+        app = nil
+    ]];
+    loop do
+        [[ app, t = next(apps, app) ]];
+        var bool no? = [[ app==nil ]];
+        if no? then
+            break;
+        end
+        [[ assert(type(t) == 'table') ]];
+
+        var bool src? = [[ type(t.source)=='string' ]];
+        var _tceu_app* app = null;
+        if src? then
+            var char[255] source = [[ t.source ]];
+            finalize
+                app = app_load(source);
+            with
+                // TODO
+            end
+            [[ t.pointer = @app ]];
+        else
+            // PRELOADED
+            [[
+                if app == 'fat' then
+                    t.pointer = @fat
+                elseif app == 'lua' then
+                    t.pointer = @lua
+                else
+                    assert(app == 'init')
+                    t.pointer = @((void*)__ceu_app)
+                end
+            ]]
+            app = [[ t.pointer ]];
+        end
+        [[ assert(t.pointer) ]];
+        _ceu_out_assert(app != null);
+        [[ t.ifc = assert(loadstring(@(char*)app:luaifc))() ]];
+    end
+
+    // link links
+    var int n = [[ (links and #links) or 0 ]];
+    loop i in n do
+        [[
+            lnk = links[@i+1]
+            assert(type(lnk)=='table' and #lnk==4)
+            app1,evt1, app2,evt2 = unpack(lnk)
+        ]];
+
+        // app1,evt1 , app2,evt2
+        var _tceu_app* app1 = [[ app1.pointer ]];
+        var int evt1 = [[ app1.ifc[evt1].n ]];
+        var _tceu_app* app2 = [[ app2.pointer ]];
+        var int evt2 = [[ app2.ifc[evt2].n ]];
+
+        _ceu_out_link(app1,evt1 , app2,evt2);
+    end
+
+    // start apps
+    [[
+        apps = apps or {}
+        app = nil
+    ]];
+    loop do
+        [[ app, t = next(apps, app) ]];
+        var bool nxt? = [[ app~=nil ]];
+        if not nxt? then
+            break;
+        end
+        [[ assert(type(t) == 'table') ]];
+
+        var bool src? = [[ type(t.source)=='string' ]];
+        if src? then
+            var _tceu_app* app = [[ t.pointer ]];
+            _ceu_out_start(app);
+        end
+    end
+end
+
+await FOREVER;

@@ -9,7 +9,7 @@ CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
 CFLAGS += -fno-zero-initialized-in-bss
 
-CFLAGS_KERNEL = $(CFLAGS) $(CEUOSLUA)
+CFLAGS_KERNEL = $(CFLAGS) $(CEUOSLUAIFC)
 
 CFLAGS_APP = -fpic #-mpic-data-is-text-relative
 CFLAGS_APP += -fno-zero-initialized-in-bss
@@ -114,8 +114,6 @@ tst4: fat kernel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 tst5: APP=tst5.c
-#tst5: CEUOSLUA=-DCEU_OS_LUA
-#tst5: ceuoslua=--os-lua
 tst5: fat kernel
 	cd ../led  && make led  && cd - && cp ../led/led.app .
 	cd ../uart && make uart && cd - && cp ../uart/uart.app .
@@ -144,12 +142,17 @@ tst5: fat kernel
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
+init: APP=init.c
+init: CEUOSLUAIFC=-D CEU_OS_LUAIFC
+init: ceuosluaifc=--os-luaifc
 init: fat kernel
-	cd ../led  && make led  && cd - && cp ../led/led.app .
-	cd ../uart && make uart && cd - && cp ../uart/uart.app .
-	cd ../uart && make tst  && cd - && cp ../uart/tst.app uart_tst.app
-	cd ../lua  && make lua  && cd - && cp ../lua/lua.app .
-	ceu init.ceu --os --verbose \
+	cd ../led  && make ceuosluaifc=--os-luaifc led  && cd - && cp ../led/led.app .
+	cd ../uart && make ceuosluaifc=--os-luaifc uart && cd - && cp ../uart/uart.app .
+	cd ../uart && make ceuosluaifc=--os-luaifc tst  && cd - && cp ../uart/tst.app uart_tst.app
+	cd ../lua  && make ceuosluaifc=--os-luaifc lua  && cd - && cp ../lua/lua.app .
+	$(ARMGNU)-objcopy _ceu_lua.elf --change-addresses=0x300000 -O ihex _ceu_lua.hex
+	###
+	ceu init.ceu --os $(ceuosluaifc) --verbose \
 				--out-c _ceu_init.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -161,16 +164,17 @@ init: fat kernel
 	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_init.elf -O binary init.app
-	$(ARMGNU)-objcopy _ceu_init.elf --change-addresses=0x300000 -O ihex _ceu_init.hex
+	$(ARMGNU)-objcopy _ceu_init.elf --change-addresses=0x320000 -O ihex _ceu_init.hex
 	###
 	$(SRECCAT) kernel.hex    -intel -offset -0x8000 \
 			   _ceu_fat.hex  -intel -offset -0x8000 \
+			   _ceu_lua.hex  -intel -offset -0x8000 \
 			   _ceu_init.hex -intel -offset -0x8000 \
 					-o all.hex -intel
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 fat:
-	ceu fat.ceu --os $(ceuoslua) --verbose \
+	ceu fat.ceu --os $(ceuosluaifc) --verbose \
 				--out-c _ceu_fat.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

@@ -2,10 +2,6 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
-ifdef LUA
-ceuoslua = --os-lua
-endif
-
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_DEBUG -DCEU_OS -I$(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
@@ -52,7 +48,7 @@ all: uart tst
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 uart:
-	ceu uart.ceu --os $(ceuoslua) --verbose \
+	ceu uart.ceu --os $(ceuosluaifc) --verbose \
 				--out-c _ceu_uart.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
@@ -64,7 +60,7 @@ uart:
 	$(ARMGNU)-objcopy _ceu_uart.elf -O binary uart.app
 
 tst:
-	ceu tst.ceu --os $(ceuoslua) --verbose \
+	ceu tst.ceu --os $(ceuosluaifc) --verbose \
 				--out-c _ceu_tst.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

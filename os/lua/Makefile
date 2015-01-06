@@ -67,7 +67,7 @@ main:
 
 lua:
 	cd lua-5.1.5/ && make generic && cd -
-	ceu lua.ceu --os $(ceuoslua) --verbose \
+	ceu lua.ceu --os $(ceuosluaifc) --verbose \
 				--out-c _ceu_lua.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"

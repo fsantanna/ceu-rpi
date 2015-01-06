@@ -2,10 +2,6 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
-ifdef LUA
-ceuoslua = --os-lua
-endif
-
 CFLAGS = -Wall #-O2
 CFLAGS += -DCEU_OS -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
@@ -52,7 +48,7 @@ all: led
 	$(SRECCAT) all.hex -intel -o kernel.img -Binary
 
 led:
-	ceu led.ceu --os $(ceuoslua) --verbose \
+	ceu led.ceu --os $(ceuosluaifc) --verbose \
 				--out-c _ceu_led.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
