@@ -1,3 +1,6 @@
+os/musl
+dwelch/
+firmware/
 OLD/
 *.elf
 *.map

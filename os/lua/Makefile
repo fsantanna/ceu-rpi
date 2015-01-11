@@ -75,6 +75,7 @@ lua:
 				--out-c _ceu_lua.c \
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
+	#cp /tmp/_ceu_lua.c .
 	$(ARMGNU)-gcc $(CFLAGS_APP) $(LDFLAGS_APP) \
 		-I lua-5.1.5/src/ \
 		_ceu_lua.c -o _ceu_lua.elf \

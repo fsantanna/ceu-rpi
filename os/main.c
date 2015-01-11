@@ -34,7 +34,7 @@ void ceu_sys_assert (int v) {
 }
 
 #include "ceu_log.h"
-void ceu_sys_log (int mode, const void* s) {
+void ceu_sys_log (int mode, void* s) {
     ceu_log(mode, s);
 }
 

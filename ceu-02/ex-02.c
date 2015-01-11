@@ -31,7 +31,7 @@ tceu_app* APP;
 void IRQ_HANDLER (void) {
     if (_GET32(TIMER_CS) & 0x02) {
         _PUT32(TIMER_CS,2);
-        ceu_out_go(APP, CEU_IN__WCLOCK, CEU_EVTP((s32)DT));
+        ceu_out_go(APP, CEU_IN__WCLOCK, &DT);
     }
 }
 

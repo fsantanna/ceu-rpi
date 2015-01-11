@@ -1,7 +1,7 @@
 
 ARMGNU ?= arm-none-eabi
 
-COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding 
+COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding -DCEU_NOSTDLIB
 
 gcc : ex-02.hex ex-02.bin
 

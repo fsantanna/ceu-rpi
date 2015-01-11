@@ -19,12 +19,6 @@
 #define CEU_ISR_OFF()
 #endif
 
-#ifdef __cplusplus
-#define CEU_EVTP(v) (tceu_evtp(v))
-#else
-#define CEU_EVTP(v) ((tceu_evtp)v)
-#endif
-
 #if defined(CEU_OS_KERNEL) || defined(CEU_OS_APP)
 #define CEU_OS
 #endif
@@ -60,9 +54,9 @@
     #define CEU_IN__ORG_PSED    253
     #define CEU_IN__INIT        252
     #define CEU_IN__CLEAR       251
-    #define CEU_IN__WCLOCK      250
-    #define CEU_IN__ASYNC       249
-    #define CEU_IN__THREAD      248
+    #define CEU_IN__ASYNC       250
+    #define CEU_IN__THREAD      249
+    #define CEU_IN__WCLOCK      248
     #define CEU_IN_OS_START     247
     #define CEU_IN_OS_STOP      246
     #define CEU_IN_OS_DT        245
@@ -113,13 +107,10 @@
     #define ceu_out_link(app1,evt1 , app2,evt2) \
         ((__typeof__(ceu_sys_link)*)((_ceu_app)->sys_vec[CEU_SYS_LINK]))(app1,evt1,app2,evt2)
 
-    #define ceu_out_emit_buf(app,id,sz,buf) \
-        ((__typeof__(ceu_sys_emit)*)((app)->sys_vec[CEU_SYS_EMIT]))(app,id,CEU_EVTP((void*)NULL),sz,buf)
+    #define ceu_out_emit(app,id,sz,buf) \
+        ((__typeof__(ceu_sys_emit)*)((app)->sys_vec[CEU_SYS_EMIT]))(app,id,sz,buf)
 
-    #define ceu_out_emit_val(app,id,param) \
-        ((__typeof__(ceu_sys_emit)*)((app)->sys_vec[CEU_SYS_EMIT]))(app,id,param,0,NULL)
-
-    #define ceu_out_call_val(app,id,param) \
+    #define ceu_out_call(app,id,param) \
         ((__typeof__(ceu_sys_call)*)((app)->sys_vec[CEU_SYS_CALL]))(app,id,param)
 
 #ifdef CEU_WCLOCKS
@@ -156,10 +147,6 @@
     #define ceu_out_org_spawn(go, lbl_cnt, org, lbl_org) \
             ceu_sys_org_spawn(go, lbl_cnt, org, lbl_org)
 #endif
-/*#ifdef ceu_out_emit_val*/
-    #define ceu_out_emit_buf(app,id,sz,buf) \
-            ceu_out_emit_val(app,id,CEU_EVTP((void*)buf))
-/*#endif*/
 #ifdef CEU_WCLOCKS
     #define ceu_out_wclock(app,dt,set,get) \
             ceu_sys_wclock(app,dt,set,get)
@@ -172,8 +159,8 @@
             ceu_sys_go(app,evt,evtp)
 #endif
 
-#define ceu_in_emit_val(app,id,param) \
-    ceu_out_go(app,id,param)
+#define ceu_in_emit(app,id,n,buf) \
+    ceu_out_go(app,id,buf)
 
 #ifdef CEU_THREADS
 /* TODO: app */
@@ -195,11 +182,12 @@
 
 #ifdef CEU_OS_APP
     #define ceu_luaL_newstate(set) { \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_NEW, CEU_EVTP((void*)NULL)).ptr; \
+        set = ceu_out_call(_ceu_app, CEU_OUT_LUA_NEW, NULL); \
     }
 
     #define ceu_luaL_openlibs(l) { \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUAL_OPENLIBS, CEU_EVTP((void*)l)); \
+        lua_State* p = l;          \
+        ceu_out_call(_ceu_app, CEU_OUT_LUAL_OPENLIBS, &p); \
     }
 
     #define ceu_lua_atpanic(l, f) {     \
@@ -207,76 +195,77 @@
 
     #define ceu_luaL_loadstring(set, l, str) {  \
         tceu__lua_State___char_ p = { l, str }; \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUAL_LOADSTRING, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUAL_LOADSTRING, &p); \
     }
 
     #define ceu_lua_pushnumber(l, v) {      \
         tceu__lua_State___int p = { l, v }; \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PUSHNUMBER, CEU_EVTP((void*)&p)); \
+        ceu_out_call(_ceu_app, CEU_OUT_LUA_PUSHNUMBER, &p); \
     }
 
     #define ceu_lua_pushstring(l, v) {      \
         tceu__lua_State___char_ p = { l, v }; \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PUSHSTRING, CEU_EVTP((void*)&p)); \
+        ceu_out_call(_ceu_app, CEU_OUT_LUA_PUSHSTRING, &p); \
     }
 
     #define ceu_lua_pushlightuserdata(l, v) {   \
         tceu__lua_State___void_ p = { l, v };     \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PUSHLIGHTUSERDATA, CEU_EVTP((void*)&p)); \
+        ceu_out_call(_ceu_app, CEU_OUT_LUA_PUSHLIGHTUSERDATA, &p); \
     }
 
     #define ceu_lua_pcall(set,l,nargs,nrets,err) {                  \
         tceu__lua_State___int__int__int p = { l, nargs, nrets, err }; \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_PCALL, CEU_EVTP((void*)&p)); \
+        ceu_out_call(_ceu_app, CEU_OUT_LUA_PCALL, &p); \
     }
 
     #define ceu_lua_isnumber(set, l, idx) {     \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISNUMBER, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUA_ISNUMBER, &p); \
     }
 
     #define ceu_lua_tonumber(set, l, idx) {     \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TONUMBER, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUA_TONUMBER, &p); \
     }
 
     #define ceu_lua_isboolean(set, l, idx) {    \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISBOOLEAN, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUA_ISBOOLEAN, &p); \
     }
 
     #define ceu_lua_toboolean(set, l, idx) {    \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TOBOOLEAN, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUA_TOBOOLEAN, &p); \
     }
 
     #define ceu_lua_pop(l, n) {             \
         tceu__lua_State___int p = { l, n }; \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_POP, CEU_EVTP((void*)&p)); \
+        ceu_out_call(_ceu_app, CEU_OUT_LUA_POP, &p); \
     }
 
     #define ceu_lua_isstring(set, l, idx) {     \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISSTRING, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUA_ISSTRING, &p); \
     }
 
     #define ceu_lua_tostring(set, l, idx) {     \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TOSTRING, CEU_EVTP((void*)&p)).ptr; \
+        set = ceu_out_call(_ceu_app, CEU_OUT_LUA_TOSTRING, &p); \
     }
 
     #define ceu_lua_islightuserdata(set, l, idx) {  \
         tceu__lua_State___int p = { l, idx };       \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ISLIGHTUSERDATA, CEU_EVTP((void*)&p)).v; \
+        set = (int) ceu_out_call(_ceu_app, CEU_OUT_LUA_ISLIGHTUSERDATA, &p); \
     }
 
     #define ceu_lua_touserdata(set, l, idx) {   \
         tceu__lua_State___int p = { l, idx };   \
-        set = ceu_out_call_val(_ceu_app, CEU_OUT_LUA_TOUSERDATA, CEU_EVTP((void*)&p)).ptr; \
+        set = ceu_out_call(_ceu_app, CEU_OUT_LUA_TOUSERDATA, &p); \
     }
 
     #define ceu_lua_error(l) {  \
-        ceu_out_call_val(_ceu_app, CEU_OUT_LUA_ERROR, CEU_EVTP((void*)l)); \
+        lua_State** p = &l;        \
+        ceu_out_call(_ceu_app, CEU_OUT_LUA_ERROR, &p); \
     }
 #else
     #define ceu_luaL_newstate(set)               set = luaL_newstate()
@@ -341,24 +330,8 @@ typedef union tceu_trl {
 #endif
 } tceu_trl;
 
-/* TCEU_EVTP */
-
-typedef union tceu_evtp {
-    int   v;
-    float f;
-    void* ptr;
-    s32   dt;
-#ifdef CEU_THREADS
-    CEU_THREADS_T thread;
-#endif
-#ifdef __cplusplus
-    tceu_evtp () {}
-    tceu_evtp (float vv) : float(vv) {}
-    tceu_evtp (void* vv) : ptr(vv)   {}
-    tceu_evtp (s32   vv) : dt(vv)    {}
-    /*tceu_evtp (int   vv) : v(vv)   {}*/
-#endif
-} tceu_evtp;
+/* TODO: remove */
+#define tceu_evtp void*
 
 /* TCEU_STK */
 
@@ -619,7 +592,6 @@ typedef struct tceu_lnk {
 typedef struct {
     tceu_app* app;
     tceu_nevt evt;
-    tceu_evtp param;
 #if CEU_QUEUE_MAX == 256
     s8        sz;
 #else
@@ -638,7 +610,7 @@ tceu_queue* ceu_sys_queue_nxt (void);
 void        ceu_sys_queue_rem (void);
 
 void      ceu_sys_assert    (int v);
-void      ceu_sys_log       (int mode, const void* str);
+void      ceu_sys_log       (int mode, void* str);
 void*     ceu_sys_realloc   (void* ptr, size_t size);
 int       ceu_sys_req       (void);
 tceu_app* ceu_sys_load      (void* addr);
@@ -653,7 +625,7 @@ int       ceu_sys_org_spawn (tceu_go* _ceu_go, tceu_nlbl lbl_cnt, tceu_org* org,
 void      ceu_sys_start     (tceu_app* app);
 int       ceu_sys_link      (tceu_app* src_app, tceu_nevt src_evt, tceu_app* dst_app, tceu_nevt dst_evt);
 int       ceu_sys_unlink    (tceu_app* src_app, tceu_nevt src_evt, tceu_app* dst_app, tceu_nevt dst_evt);
-int       ceu_sys_emit      (tceu_app* app, tceu_nevt evt, tceu_evtp param, int sz, byte* buf);
+int       ceu_sys_emit      (tceu_app* app, tceu_nevt evt, int sz, tceu_evtp param);
 tceu_evtp ceu_sys_call      (tceu_app* app, tceu_nevt evt, tceu_evtp param);
 
 enum {

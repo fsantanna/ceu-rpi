@@ -18,7 +18,7 @@ output (_FILE* f)=>int SIZE;
 output (void* ptr, int size, int nmemb, _FILE* f)=>int READ;
 
 output (void)=>_lua_State* LUA_NEW;
-output (_lua_State* l, _lua_Number v)=>void LUA_PUSHNUMBER;
+output (_lua_State* l, int v)=>void LUA_PUSHNUMBER;
 output (_lua_State* l, int index)=>int LUA_TONUMBER;
 output (_lua_State* l, char* name)=>void LUA_GETGLOBAL;
 output (_lua_State* l)=>void LUA_PUSHNIL;
@@ -44,7 +44,6 @@ output (_lua_State* l, int index)=>int LUA_TOBOOLEAN;
 output (_lua_State* l, int index)=>void* LUA_TOUSERDATA;
 output (_lua_State* l, int nargs, int nresults, int errfunc)=>int LUA_PCALL;
 
-
         // TODO: pure
 function (char* path)=>_tceu_app* app_load do
     var _FILE[] f = (call OPEN => (path, "r"));
@@ -52,6 +51,7 @@ function (char* path)=>_tceu_app* app_load do
 
     var int flen = (call SIZE => f);
     var char[] buf = (char *)_ceu_out_realloc_unsafe(null, flen);
+    _ceu_out_assert(buf != null);
     call READ => (buf, 1, flen, f);
     call CLOSE => f;
 
@@ -59,6 +59,7 @@ function (char* path)=>_tceu_app* app_load do
     _ceu_out_assert(app != null);
     return app;
 end
+
 
 // LUA
 

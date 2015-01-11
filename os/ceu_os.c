@@ -58,7 +58,7 @@ void ceu_sys_assert (int v) {
 #endif
 }
 
-void ceu_sys_log (int mode, const void* s) {
+void ceu_sys_log (int mode, void* s) {
     if (mode == 0) {
         fprintf(stderr, "%s", (char*)s);
     } else {
@@ -263,7 +263,7 @@ int ceu_sys_wclock_ (tceu_app* app, s32 dt, s32* set, s32* get)
 int ceu_lua_atpanic_f (lua_State* lua) {
 #ifdef CEU_DEBUG
     ceu_out_log(0, "LUA_ATPANIC: ");
-    ceu_out_log(0, lua_tostring(lua,-1));
+    ceu_out_log(0, (void*)lua_tostring(lua,-1));
     ceu_out_log(0, "\n");
 /*
 */
@@ -329,16 +329,16 @@ void ceu_sys_go (tceu_app* app, int evt, tceu_evtp evtp)
 #endif
 #ifdef CEU_WCLOCKS
         case CEU_IN__WCLOCK:
-            if (app->wclk_min <= evtp.dt) {
-                app->wclk_late = evtp.dt - app->wclk_min;
+            if (app->wclk_min <= *((s32*)evtp)) {
+                app->wclk_late = *((s32*)evtp) - app->wclk_min;
             }
             app->wclk_min_tmp = app->wclk_min;
             app->wclk_min     = CEU_WCLOCK_INACTIVE;
             break;
 #ifdef CEU_TIMEMACHINE
         case CEU_IN__WCLOCK_:
-            if (app->wclk_min_ <= evtp.dt) {
-                app->wclk_late_ = evtp.dt - app->wclk_min_;
+            if (app->wclk_min_ <= *((s32*)evtp)) {
+                app->wclk_late_ = *((s32*)evtp) - app->wclk_min_;
             }
             app->wclk_min_tmp_ = app->wclk_min_;
             app->wclk_min_     = CEU_WCLOCK_INACTIVE;
@@ -708,7 +708,7 @@ int ceu_go_all (tceu_app* app)
     if (app->isAlive)
 #endif
     {
-        ceu_sys_go(app, CEU_IN_OS_START, CEU_EVTP((void*)NULL));
+        ceu_sys_go(app, CEU_IN_OS_START, NULL);
     }
 #endif
 
@@ -724,7 +724,7 @@ int ceu_go_all (tceu_app* app)
                 app->pendingAsyncs
             ) )
     {
-        ceu_sys_go(app, CEU_IN__ASYNC, CEU_EVTP((void*)NULL));
+        ceu_sys_go(app, CEU_IN__ASYNC, NULL);
 #ifdef CEU_THREADS
         CEU_THREADS_MUTEX_UNLOCK(&app->threads_mutex);
         /* allow threads to also execute */
@@ -818,8 +818,7 @@ tceu_queue* ceu_sys_queue_get (void) {
     return ret;
 }
 
-int ceu_sys_queue_put (tceu_app* app, tceu_nevt evt, tceu_evtp param,
-                       int sz, byte* buf) {
+int ceu_sys_queue_put (tceu_app* app, tceu_nevt evt, int sz, byte* buf) {
     CEU_ISR_OFF();
 
     int n = sizeof(tceu_queue) + sz;
@@ -845,15 +844,7 @@ int ceu_sys_queue_put (tceu_app* app, tceu_nevt evt, tceu_evtp param,
         qu->app = app;
         qu->evt = evt;
         qu->sz  = sz;
-
-        if (sz == 0) {
-            /* "param" is self-contained */
-            qu->param = param;
-        } else {
-            /* "param" points to "buf" */
-            qu->param.ptr = qu->buf;
-            memcpy(qu->buf, buf, sz);
-        }
+        memcpy(qu->buf, buf, sz);
     }
     QUEUE_put += n;
     QUEUE_tot += n;
@@ -881,9 +872,8 @@ static tceu_lnk* CEU_LNKS = NULL;
 #endif
 
 /* TODO: remove this */
-int ceu_sys_emit (tceu_app* app, tceu_nevt evt, tceu_evtp param,
-                  int sz, byte* buf) {
-    return ceu_sys_queue_put(app, evt, param, sz, buf);
+int ceu_sys_emit (tceu_app* app, tceu_nevt evt, int sz, tceu_evtp param) {
+    return ceu_sys_queue_put(app, evt, sz, param);
 }
 
 tceu_evtp ceu_sys_call (tceu_app* app, tceu_nevt evt, tceu_evtp param) {
@@ -904,7 +894,7 @@ tceu_evtp ceu_sys_call (tceu_app* app, tceu_nevt evt, tceu_evtp param) {
         return ret;
     }
 /* TODO: error? */
-    return CEU_EVTP((void*)NULL);
+    return NULL;
 }
 
 static void _ceu_sys_unlink (tceu_lnk* lnk) {
@@ -1051,7 +1041,7 @@ int ceu_os_scheduler (int(*dt)())
         {
             tceu_app* app = CEU_APPS;
             while (app) {
-                ceu_sys_go(app, CEU_IN_OS_DT, CEU_EVTP(_dt));
+                ceu_sys_go(app, CEU_IN_OS_DT, &dt);
                 app = app->nxt;
             }
         }
@@ -1065,7 +1055,7 @@ int ceu_os_scheduler (int(*dt)())
 /*
 #error TODO: CEU_IN__WCLOCK_
 */
-                ceu_sys_go(app, CEU_IN__WCLOCK, CEU_EVTP(_dt));
+                ceu_sys_go(app, CEU_IN__WCLOCK, &_dt);
                 app = app->nxt;
             }
         }
@@ -1076,7 +1066,7 @@ int ceu_os_scheduler (int(*dt)())
         {
             tceu_app* app = CEU_APPS;
             while (app) {
-                ceu_sys_go(app, CEU_IN__ASYNC, CEU_EVTP((void*)NULL));
+                ceu_sys_go(app, CEU_IN__ASYNC, NULL);
                 app = app->nxt;
             }
         }
@@ -1100,7 +1090,7 @@ int ceu_os_scheduler (int(*dt)())
                 } else if (qu->app == NULL) {
                     tceu_app* app = CEU_APPS;
                     while (app) {
-                        ceu_sys_go(app, qu->evt, qu->param);
+                        ceu_sys_go(app, qu->evt, qu->buf);
                         app = app->nxt;
                     }
 
@@ -1111,7 +1101,7 @@ int ceu_os_scheduler (int(*dt)())
                         if ( qu->app==lnk->src_app
                         &&   qu->evt==lnk->src_evt
                         &&   lnk->dst_app->isAlive ) {
-                            ceu_sys_go(lnk->dst_app, lnk->dst_evt, qu->param);
+                            ceu_sys_go(lnk->dst_app, lnk->dst_evt, qu->buf);
                         }
                         lnk = lnk->nxt;
                     }
@@ -1219,7 +1209,7 @@ printf("<<< %d %d\n", app->isAlive, app->ret);
     /* OS_START */
 
 #ifdef CEU_IN_OS_START
-    ceu_sys_emit(NULL, CEU_IN_OS_START, CEU_EVTP((void*)NULL), 0, NULL);
+    ceu_sys_emit(NULL, CEU_IN_OS_START, 0, NULL);
 #endif
 }
 

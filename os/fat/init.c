@@ -56,6 +56,7 @@ void MAIN (void)
     /* emit APPS => (fat, lua); */
     {
         apps_t apps = { fat, lua };
-        ceu_sys_go(init, 243, CEU_EVTP((void*)&apps));
+        apps_t* evtp = &apps;
+        ceu_sys_go(init, 243, &evtp);
     }
 }

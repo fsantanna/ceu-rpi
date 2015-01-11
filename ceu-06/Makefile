@@ -5,7 +5,7 @@ TARGET = kernel.img
 LIST = kernel.list
 MAP = kernel.map
 LINKER = kernel.ld
-CFLAGS = -Wall -fno-zero-initialized-in-bss
+CFLAGS = -Wall -fno-zero-initialized-in-bss -DCEU_NOSTDLIB
 
 OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))
 OBJECTS += $(patsubst $(SOURCE)%.c,$(BUILD)%.o,$(wildcard $(SOURCE)*.c))
@@ -38,3 +38,11 @@ clean :
 	-rm -f $(TARGET)
 	-rm -f $(LIST)
 	-rm -f $(MAP)
+
+sdcard:
+	sudo mount /dev/sdb1 /mnt
+	sudo cp kernel.img /mnt/kernel.img
+	sudo umount /dev/sdb1
+
+xmodem:
+	sx -vv kernel.img < /dev/ttyUSB0 > /dev/ttyUSB0

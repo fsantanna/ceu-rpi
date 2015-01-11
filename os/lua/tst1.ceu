@@ -5,7 +5,7 @@ end
 native @nohold _ceu_out_log();
 
 output (void)=>_lua_State* LUA_NEW;
-output (_lua_State* l, _lua_Number v)=>void LUA_PUSHNUMBER;
+output (_lua_State* l, int v)=>void LUA_PUSHNUMBER;
 output (_lua_State* l, int index)=>int LUA_TONUMBER;
 output (_lua_State* l, char* name)=>void LUA_GETGLOBAL;
 output (_lua_State* l)=>void LUA_PUSHNIL;

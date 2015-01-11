@@ -1,7 +1,7 @@
 
 ARMGNU ?= arm-none-eabi
 
-COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding 
+COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding -DCEU_NOSTDLIB
 
 gcc : ex-04.bin
 
@@ -38,35 +38,6 @@ ex-04.bin : loader vectors.o ex-04.o keyboard.o memutils.o
 	$(ARMGNU)-objdump -D ex-04.elf > ex-04.list
 	$(ARMGNU)-objcopy ex-04.elf -O ihex ex-04.hex
 	$(ARMGNU)-objcopy ex-04.elf -O binary ex-04.bin
-
-
-
-
-
-
-LOPS = -Wall -m32 -emit-llvm
-LLCOPS0 = -march=arm 
-LLCOPS1 = -march=arm -mcpu=arm1176jzf-s
-LLCOPS = $(LLCOPS1)
-COPS = -Wall  -O2 -nostdlib -nostartfiles -ffreestanding
-OOPS = -std-compile-opts
-
-clang : ex-04.bin
-
-ex-04.bc : ex-04.c image_smile.h
-	clang $(LOPS) -c ex-04.c -o ex-04.bc
-
-ex-04.clang.elf : loader vectors.o ex-04.bc
-	llvm-link ex-04.bc -o ex-04.nopt.bc
-	opt $(OOPS) ex-04.nopt.bc -o ex-04.opt.bc
-	#llc $(LLCOPS) ex-04.opt.bc -o ex-04.clang.s
-	#$(ARMGNU)-as ex-04.clang.s -o ex-04.clang.o
-	llc $(LLCOPS) -filetype=obj ex-04.opt.bc -o ex-04.clang.o
-	$(ARMGNU)-ld -o ex-04.clang.elf -T loader vectors.o ex-04.clang.o
-	$(ARMGNU)-objdump -D ex-04.clang.elf > ex-04.clang.list
-
-#ex-04.bin : ex-04.clang.elf
-	#$(ARMGNU)-objcopy ex-04.clang.elf ex-04.clang.bin -O binary
 
 sdcard:
 	sudo mount /dev/sdb1 /mnt
