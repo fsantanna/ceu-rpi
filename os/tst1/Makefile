@@ -2,12 +2,19 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
-CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_OS -I $(CEUDIR)
+# Ceu and C
+FLAGS = -I $(CEUDIR)
+
+CFLAGS = $(FLAGS)
+CFLAGS += -Wall -O2
+CFLAGS += -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
+#CFLAGS += -fpic -mpic-data-is-text-relative
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
+
+KFLAGS = -DCEU_OS_KERNEL $(CFLAGS) -include $(CEUDIR)/main.h
 
 CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
 LDFLAGS_ONE = -Wl,-T../app.ld
@@ -23,12 +30,13 @@ all:
 	$(ARMGNU)-objcopy ceu_tst.elf --change-addresses=0x110000 -O ihex ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_os.o app.o main.o \
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
+	$(ARMGNU)-gcc $(KFLAGS) -c tst.c                -o app.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/main.c     -o main.o
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o ceu_pool.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	#$(ARMGNU)-gcc -g $(CFLAGS)
 				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s

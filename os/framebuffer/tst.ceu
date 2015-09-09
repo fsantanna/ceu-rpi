@@ -1,10 +1,10 @@
 output (uint x, uint y, u8 r, u8 g, u8 b)=>void
     DRAW_PIXEL;
-output (int* w, int* h)=>void
+output (int&& w, int&& h)=>void
     GET_CHARACTER_SIZE;
 output (char c, uint x, uint y, u8 r, u8 g, u8 b)=>void
     DRAW_CHARACTER;
-output @rec (char* str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void
+output @rec (char&& str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void
     DRAW_STRING;
 
 loop line in 480 do
@@ -24,7 +24,7 @@ end
 await 2s;
 
 var int w, h;
-call GET_CHARACTER_SIZE => (&w, &h);
+call GET_CHARACTER_SIZE => (&&w, &&h);
 
 loop i in 10 do
     call DRAW_CHARACTER => ('a'+i, 10+i*(w+1),10, 0xFF,0xFF,0xFF);

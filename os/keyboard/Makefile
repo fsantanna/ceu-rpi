@@ -6,16 +6,28 @@ ifdef LUA
 ceuoslua = --os-lua
 endif
 
-CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_DEBUG -DCEU_OS -I $(CEUDIR)
+CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
+LDFLAGS_ONE = -Wl,-T../app.ld
+
+# Ceu and C
+FLAGS = -I $(CEUDIR)
+
+CFLAGS = $(FLAGS)
+CFLAGS += -Wall #-O2
+CFLAGS += -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nostdinc -isystem ../musl/include
 CFLAGS += -fno-zero-initialized-in-bss
 #CFLAGS += -fpic -mpic-data-is-text-relative
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
-CFLAGS_ONE = -fpic #-mpic-data-is-text-relative
-LDFLAGS_ONE = -Wl,-T../app.ld
+KFLAGS = -DCEU_OS_KERNEL $(CEUOSLUAIFC) $(CFLAGS) -include $(CEUDIR)/main.h
+
+AFLAGS  = $(CFLAGS) -DCEU_OS_APP
+AFLAGS += -fpic #-mpic-data-is-text-relative
+AFLAGS += -fno-zero-initialized-in-bss
+LDFLAGS_APP = -Wl,-T../app.ld
 
 all:
 	cd ../framebuffer && make
@@ -39,20 +51,20 @@ all:
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst.c .
 	$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_ONE) $(LDFLAGS_ONE) \
-		../debug.c _ceu_tst.c -o _ceu_tst.elf
+		_ceu_tst.c -o _ceu_tst.elf
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst.elf | grep ".bss"
 	$(ARMGNU)-objcopy _ceu_tst.elf -O binary tst.app
 	$(ARMGNU)-objcopy _ceu_tst.elf --change-addresses=0x128000 -O ihex _ceu_tst.hex
 	###
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/debug.c    -o debug.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o debug.o ceu_os.o app.o main.o \
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
+	$(ARMGNU)-gcc $(KFLAGS) -c tst.c                -o app.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/main.c     -o main.o
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o ceu_pool.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	#$(ARMGNU)-gcc -g $(CFLAGS)
 				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s

@@ -1,13 +1,13 @@
 // FRAMEBUFFER
-output (int* w, int* h)=>void GET_CHARACTER_SIZE;
+output (int&& w, int&& h)=>void GET_CHARACTER_SIZE;
 output (char c, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_CHARACTER;
-output @rec (char* str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_STRING;
+output @rec (char&& str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_STRING;
 
 // KEYBOARD
 input int KEY;
 
 var int w, h;
-call GET_CHARACTER_SIZE => (&w, &h);
+call GET_CHARACTER_SIZE => (&&w, &&h);
 
 call DRAW_STRING => ("Welcome to Ceu/OS!", 18, 50, 50, 0xFF,0xFF,0xFF);
 call DRAW_STRING => ("> ", 2, 50, 50+h, 0xFF,0xFF,0xFF);

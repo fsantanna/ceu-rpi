@@ -8,16 +8,16 @@ _console_write("Welcome to Ceu/OS !\n");
 input int KEYBOARD;
 
 native @nohold _console_write();
+native @plain  _char;
 
 par do
-    var char c;
-    var char[2] str;
+    var _char[2] str;
         str[0] = 0;
         str[1] = 0;
 
     every c in KEYBOARD do
         str[0] = c;
-        _console_write(str);
+        _console_write(&&str);
     end
 with
     var int x = 100;

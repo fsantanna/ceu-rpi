@@ -1,28 +1,35 @@
 ARMGNU = arm-none-eabi
 CEUDIR = /data/ceu/ceu-rpi/os
 
-CFLAGS = -Wall -O2
-CFLAGS += -DCEU_OS -I $(CEUDIR)
+# Ceu and C
+FLAGS = -I $(CEUDIR)
+
+CFLAGS = $(FLAGS)
+CFLAGS += -Wall -O2
+CFLAGS += -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -fno-zero-initialized-in-bss
 #CFLAGS += -fpic -mpic-data-is-text-relative
 #CFLAGS += -fwhole-program #-flto
 #LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
+KFLAGS = -DCEU_OS_KERNEL $(CFLAGS) -include $(CEUDIR)/main.h
+
 all:
 	ceu tst.ceu --os --verbose \
 				--out-c _ceu_tst.c \
 				--cpp-exe "arm-none-eabi-cpp" \
-				--cpp-args "$(CFLAGS)"
+				--cpp-args "$(FLAGS)"
 	#cp /tmp/_ceu_tst.c .
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS) -c tst.c                -o app.o
-	$(ARMGNU)-gcc $(CFLAGS) -c $(CEUDIR)/main.c     -o main.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
+	$(ARMGNU)-gcc $(KFLAGS) -c tst.c                -o app.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/main.c     -o main.o
 	$(ARMGNU)-gcc $(CFLAGS) -c _ceu_tst.c           -o _ceu_tst.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_os.o app.o main.o _ceu_tst.o \
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o ceu_pool.o ceu_os.o app.o main.o _ceu_tst.o \
 					-T $(CEUDIR)/kernel.ld -o all.elf
 	#$(ARMGNU)-gcc -g $(CFLAGS)
 				  #$(CEUDIR)/ceu_pool.c $(CEUDIR)/ceu_os.c $(CEUDIR)/vectors.s

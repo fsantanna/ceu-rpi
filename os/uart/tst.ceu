@@ -1,7 +1,6 @@
 input  int RECEIVE;
 output int SEND;
 
-var int c;
 every c in RECEIVE do
     emit SEND => c;
 end

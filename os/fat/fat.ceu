@@ -3,24 +3,25 @@ native do
     ##include "vfs.h"
     void libfs_init();
     //##include "uart.h"
+    ##define PURE(x) x
 end
 
-native @pure   _fsize();
+native @pure   _fsize(), _PURE();
 native @nohold _fread(), _fopen(), _fclose();
 
-input (char* path, char* mode)=>_FILE* OPEN do
-    return _fopen(path, mode);
+input (char&& path, char&& mode)=>_FILE&& OPEN do
+    return _PURE(_fopen(path, mode));
 end
 
-input (_FILE* f)=>int CLOSE do
+input (_FILE&& f)=>int CLOSE do
     return _fclose(f);
 end
 
-input (_FILE* f)=>int SIZE do
+input (_FILE&& f)=>int SIZE do
     return _fsize(f);
 end
 
-input (void* ptr, int size, int nmemb, _FILE* f)=>int READ do
+input (void&& ptr, int size, int nmemb, _FILE&& f)=>int READ do
     return _fread(ptr, size, nmemb, f);
 end
 

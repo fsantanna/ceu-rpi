@@ -1,3 +1,6 @@
+#define ceu_out_assert(v)
+#define ceu_out_log(m,s)
+
 #include "_ceu_app.src"
 
 int notmain ( void )

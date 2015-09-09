@@ -2,18 +2,24 @@ ARMGNU = arm-none-eabi
 SRECCAT = srec_cat
 CEUDIR = /data/ceu/ceu-rpi/os
 
-CFLAGS = -Wall #-O2
-CFLAGS += -DCEU_DEBUG -I $(CEUDIR)
+# Ceu and C
+FLAGS = -I $(CEUDIR)
+
+CFLAGS = $(FLAGS)
+CFLAGS += -Wall #-O2
+CFLAGS += -I $(CEUDIR)
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -nostdinc -isystem ../musl/include
-CFLAGS += -I $(CEUDIR)/lua/lua-5.1.5/src
 CFLAGS += -fno-zero-initialized-in-bss
+#CFLAGS += -fpic -mpic-data-is-text-relative
+#CFLAGS += -fwhole-program #-flto
+#LDFLAGS += -T $(CEUDIR)/kernel.ld #-flto
 
-CFLAGS_KERNEL = $(CFLAGS) -DCEU_OS_KERNEL $(CEUOSLUAIFC) -DCEU_NOSTDLIB
+KFLAGS = -DCEU_OS_KERNEL $(CEUOSLUAIFC) $(CFLAGS) -include $(CEUDIR)/main.h
 
-CFLAGS_APP  = $(CFLAGS) -DCEU_OS_APP
-CFLAGS_APP += -fpic #-mpic-data-is-text-relative
-CFLAGS_APP += -fno-zero-initialized-in-bss
+AFLAGS  = $(CFLAGS) -DCEU_OS_APP
+AFLAGS += -fpic #-mpic-data-is-text-relative
+AFLAGS += -fno-zero-initialized-in-bss
 LDFLAGS_APP = -Wl,-T../app.ld
 
 CFLAGS_FAT = -pedantic -pedantic-errors \
@@ -31,7 +37,7 @@ tst1: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst1.c .
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_tst1.c -o _ceu_tst1.elf
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst1.elf | grep ".bss"
@@ -52,7 +58,7 @@ tst2: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst2.c .
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_tst2.c -o _ceu_tst2.elf
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst2.elf | grep ".bss"
@@ -75,7 +81,7 @@ tst3: fat kernel
 				--cpp-exe "arm-none-eabi-cpp" \
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst3.c .
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_tst3.c -o _ceu_tst3.elf
 	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".got"
 	! $(ARMGNU)-objdump -h _ceu_tst3.elf | grep ".bss"
@@ -100,7 +106,7 @@ tst4: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst4.c .
 	$(ARMGNU)-gcc -Ilib/ -I../lua/lua-5.1.5/src/ \
-		$(CFLAGS_APP) $(LDFLAGS_APP) \
+		$(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_tst4.c -o _ceu_tst4.elf
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_tst4.elf | grep ".got"
@@ -129,7 +135,7 @@ tst5: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_tst5.c .
 	$(ARMGNU)-gcc -Ilib/ -I../lua/lua-5.1.5/src/ \
-		$(CFLAGS_APP) $(LDFLAGS_APP) \
+		$(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_tst5.c -o _ceu_tst5.elf -L ../musl/lib -lc
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_tst5.elf | grep ".got"
@@ -161,7 +167,7 @@ init: fat kernel
 				--cpp-args "$(CFLAGS)"
 	#cp /tmp/_ceu_init.c .
 	$(ARMGNU)-gcc -Ilib/ -I../lua/lua-5.1.5/src/ \
-		$(CFLAGS_APP) $(LDFLAGS_APP) \
+		$(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_init.c -o _ceu_init.elf -L ../musl/lib -lc
 	! strings -a _ceu_lua.elf | grep libc | grep newlib
 	! $(ARMGNU)-objdump -h _ceu_init.elf | grep ".got"
@@ -203,7 +209,7 @@ fat:
 		lib/timer.o lib/mmio.o lib/boot.o lib/mbox.o lib/stdlib.o lib/heap.o \
 		lib/malloc.o lib/printf.o
 	# all
-	$(ARMGNU)-gcc -Ilib/ $(CFLAGS_APP) $(LDFLAGS_APP) \
+	$(ARMGNU)-gcc -Ilib/ $(AFLAGS) $(LDFLAGS_APP) \
 		_ceu_fat.c -o _ceu_fat.elf -L. -lfat -lgcc
 		# main.o
 	#$(ARMGNU)-gcc $(CFLAGS) $(CFLAGS_FAT) $(LDFLAGS_APP)
@@ -218,14 +224,12 @@ fat:
 
 kernel:
 	$(ARMGNU)-as $(CEUDIR)/vectors.s                -o vectors.o
-	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/stdlib.c   -o stdlib.o
-	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_pool.c -o ceu_pool.o
-	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
-	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -include $(CEUDIR)/ceu_log.h \
-		-c $(CEUDIR)/ceu_os.c -o ceu_os.o
-	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(APP)               -o app.o
-	$(ARMGNU)-gcc $(CFLAGS_KERNEL) -c $(CEUDIR)/main.c     -o main.o
-	$(ARMGNU)-ld vectors.o stdlib.o ceu_pool.o ceu_log.o ceu_os.o app.o main.o \
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/stdlib.c   -o stdlib.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_log.c  -o ceu_log.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/ceu_os.c   -o ceu_os.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(APP)               -o app.o
+	$(ARMGNU)-gcc $(KFLAGS) -c $(CEUDIR)/main.c     -o main.o
+	$(ARMGNU)-ld vectors.o stdlib.o ceu_log.o ceu_os.o app.o main.o \
 					-T $(CEUDIR)/kernel.ld -o kernel.elf
 	###
 	! $(ARMGNU)-objdump -h kernel.elf | grep ".got"

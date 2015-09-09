@@ -75,7 +75,7 @@ static void hex (unsigned int d) {
     //ceu_log_putc(0x20);
 }
 
-void ceu_log (int mode, char* s) {
+void ceu_log (int mode, long s) {
     int i = 0;
     init();
     if (mode == 1) {
@@ -83,8 +83,8 @@ void ceu_log (int mode, char* s) {
         hex((unsigned int)s);
     } else {
         // STRING
-        while (s[i] != '\0') {
-            ceu_log_putc(s[i]);
+        while (((char*)s)[i] != '\0') {
+            ceu_log_putc(((char*)s)[i]);
             i++;
         }
     }

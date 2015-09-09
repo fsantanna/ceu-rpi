@@ -1,6 +1,6 @@
-#define GPFSEL1 ((uint*)0x20200004)
-#define GPSET0  ((uint*)0x2020001C)
-#define GPCLR0  ((uint*)0x20200028)
+#define GPFSEL1 ((uint&&)0x20200004)
+#define GPSET0  ((uint&&)0x2020001C)
+#define GPCLR0  ((uint&&)0x20200028)
 
 native @pure _ceu_out_log();
 

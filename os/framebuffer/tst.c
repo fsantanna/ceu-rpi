@@ -1,12 +1,12 @@
 #include "ceu_os.h"
-#include <assert.h>
+//#include <assert.h>
 
 void MAIN (void)
 {
     tceu_app* framebuffer = ceu_sys_load((void*)0x110000);
     tceu_app* tst         = ceu_sys_load((void*)0x113000);
-    assert(framebuffer != NULL);
-    assert(tst         != NULL);
+    //assert(framebuffer != NULL);
+    //assert(tst         != NULL);
 
     ceu_sys_link( tst,1  ,  framebuffer,243 );
     ceu_sys_link( tst,2  ,  framebuffer,242 );

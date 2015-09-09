@@ -5,6 +5,9 @@ extern void UsbInitialise (void);
 extern void KeyboardUpdate (void);
 extern char KeyboardGetChar (void);
 
+#define ceu_out_assert(v)
+#define ceu_out_log(m,s)
+
 #define assert(x) x
 
 unsigned int MailboxWrite ( unsigned int fbinfo_addr, unsigned int channel )

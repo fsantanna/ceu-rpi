@@ -7,7 +7,7 @@ input (uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_PIXEL do
     _FB_draw_pixel(x,y, r,g,b);
 end
 
-input (int* w, int* h)=>void GET_CHARACTER_SIZE do
+input (int&& w, int&& h)=>void GET_CHARACTER_SIZE do
     *w = 5;
     *h = 9;
 end
@@ -16,7 +16,7 @@ input (char c, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_CHARACTER do
     _FB_draw_character(c, x,y, r,g,b);
 end
 
-input @rec (char* str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_STRING do
+input @rec (_char&& str, uint length, uint x, uint y, u8 r, u8 g, u8 b)=>void DRAW_STRING do
     loop i in length do
         if str[i] == '\0' then
             break;

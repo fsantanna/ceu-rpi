@@ -16,120 +16,121 @@ end
 
 // TODO
 native @pure _lua_newstate(), _lua_pushnumber(), _lua_tonumber();
+native @pure _lua_tostring(), _lua_touserdata();
 native @nohold _ceu_out_log();
 
-input (void)=>_lua_State* NEW do
+input (void)=>_lua_State&& NEW do
     return _lua_newstate(_l_alloc, __ceu_app);
 end
 
-input (_lua_State* l, int v)=>void PUSHNUMBER do
+input (_lua_State&& l, int v)=>void PUSHNUMBER do
     _lua_pushnumber(l, v);
 end
 
-input (_lua_State* l, int index)=>int TONUMBER do
+input (_lua_State&& l, int index)=>int TONUMBER do
     return _lua_tonumber(l, index);
 end
 
-input (_lua_State* l, char* name)=>void GETGLOBAL do
+input (_lua_State&& l, char&& name)=>void GETGLOBAL do
     return _lua_getglobal(l, name);
 end
 
-input (_lua_State* l)=>void PUSHNIL do
+input (_lua_State&& l)=>void PUSHNIL do
     _lua_pushnil(l);
 end
 
-input (_lua_State* l, int index)=>int NEXT do
+input (_lua_State&& l, int index)=>int NEXT do
     return _lua_next(l, index);
 end
 
-input (_lua_State* l, int index, char* k)=>void GETFIELD do
+input (_lua_State&& l, int index, char&& k)=>void GETFIELD do
     _lua_getfield(l, index, k);
 end
 
-input (_lua_State* l, int index)=>char* TOSTRING do
+input (_lua_State&& l, int index)=>char&& TOSTRING do
     return _lua_tostring(l, index);
 end
 
-input (_lua_State* l, char* str)=>int L_DOSTRING do
+input (_lua_State&& l, char&& str)=>int L_DOSTRING do
     return _luaL_dostring(l, str);
 end
 
-input (_lua_State *l, int index)=>int TYPE do
+input (_lua_State &&l, int index)=>int TYPE do
     return _lua_type(l, index);
 end
 
-input (_lua_State *l, int n)=>void POP do
+input (_lua_State &&l, int n)=>void POP do
     _lua_pop(l, n);
 end
 
-input (_lua_State *l, void *p)=>void PUSHLIGHTUSERDATA do
+input (_lua_State &&l, void &&p)=>void PUSHLIGHTUSERDATA do
     _lua_pushlightuserdata(l, p);
 end
 
-input (_lua_State *l, int index, char *k)=>void SETFIELD do
+input (_lua_State &&l, int index, char &&k)=>void SETFIELD do
     _lua_setfield(l, index, k);
 end
 
-input (_lua_State *l, int index)=>int OBJLEN do
+input (_lua_State &&l, int index)=>int OBJLEN do
     return _lua_objlen(l, index);
 end
 
-input (_lua_State *l, int index, int n)=>void RAWGETI do
+input (_lua_State &&l, int index, int n)=>void RAWGETI do
     _lua_rawgeti(l, index, n);
 end
 
-input (_lua_State *l)=>int GETTOP do
+input (_lua_State &&l)=>int GETTOP do
     return _lua_gettop(l);
 end
 
-input (_lua_State *l, int index)=>void* TOLIGHTUSERDATA do
+input (_lua_State &&l, int index)=>void&& TOLIGHTUSERDATA do
     return _lua_touserdata(l, index);
 end
 
-input (_lua_State* l, char* str)=>int L_LOADSTRING do
+input (_lua_State&& l, char&& str)=>int L_LOADSTRING do
     return _luaL_loadstring(l, str);
 end
 
-input (_lua_State* l)=>int ERROR do
+input (_lua_State&& l)=>int ERROR do
     _ceu_out_log(0, "LUA ERROR: ");
     _ceu_out_log(0, _lua_tostring(l,-1));
     _ceu_out_log(0, "\n");
     return _lua_error(l);
 end
 
-input (_lua_State* l, int index)=>int ISNUMBER do
+input (_lua_State&& l, int index)=>int ISNUMBER do
     return _lua_isnumber(l, index);
 end
 
-input (_lua_State* l, int index)=>int ISBOOLEAN do
+input (_lua_State&& l, int index)=>int ISBOOLEAN do
     return _lua_isboolean(l, index);
 end
 
-input (_lua_State* l, int index)=>int ISSTRING do
+input (_lua_State&& l, int index)=>int ISSTRING do
     return _lua_isstring(l, index);
 end
 
-input (_lua_State* l, int index)=>int ISLIGHTUSERDATA do
+input (_lua_State&& l, int index)=>int ISLIGHTUSERDATA do
     return _lua_islightuserdata(l, index);
 end
 
-input (_lua_State* l, int index)=>int TOBOOLEAN do
+input (_lua_State&& l, int index)=>int TOBOOLEAN do
     return _lua_toboolean(l, index);
 end
 
-input (_lua_State* l, int index)=>void* TOUSERDATA do
+input (_lua_State&& l, int index)=>void&& TOUSERDATA do
     return _lua_touserdata(l, index);
 end
 
-input (_lua_State* l, int nargs, int nresults, int errfunc)=>int PCALL do
+input (_lua_State&& l, int nargs, int nresults, int errfunc)=>int PCALL do
     return _lua_pcall(l, nargs, nresults, errfunc);
 end
 
-input (_lua_State* l, char* str)=>void PUSHSTRING do
+input (_lua_State&& l, char&& str)=>void PUSHSTRING do
     _lua_pushstring(l, str);
 end
 
-input (_lua_State* l)=>void L_OPENLIBS do
+input (_lua_State&& l)=>void L_OPENLIBS do
     _luaL_openlibs(l);
 end
 

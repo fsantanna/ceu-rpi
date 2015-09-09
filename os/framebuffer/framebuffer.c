@@ -54,7 +54,7 @@ unsigned int MailboxRead ( unsigned int channel )
 
 void FB_init (void) { // TODO: parameters
     MailboxWrite(((unsigned int)FB)+0x40000000, 1);
-    assert(MailboxRead(1) == 0); // TODO: check?
+    //assert(MailboxRead(1) == 0); // TODO: check?
 }
 
 void FB_draw_pixel (unsigned int x, unsigned int y,
@@ -70,7 +70,7 @@ void FB_draw_character (char c, unsigned int x, unsigned int y,
     unsigned char* CHAR = FB_FONT[c-' '];   // 9=bytes per char
     int row, col;
 
-    assert(c>=0x20 && c<0x7F);   // [SPC,DEL[
+    //assert(c>=0x20 && c<0x7F);   // [SPC,DEL[
 
     for (row=0; row<9; row++) {        // 9=lines per char
         for (col=0; col<5; col++) {   // 5=row per char

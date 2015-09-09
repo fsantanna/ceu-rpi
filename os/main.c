@@ -13,7 +13,7 @@ int dt () {
     return dt;
 }
 
-void ceu_sys_assert (int v) {
+void ceu_assert (int v) {
     #define GPFSEL1 ((uint*)0x20200004)
     #define GPSET0  ((uint*)0x2020001C)
     #define GPCLR0  ((uint*)0x20200028)
@@ -31,11 +31,6 @@ void ceu_sys_assert (int v) {
             *GPSET0 = 1<<16;   // GPIO16 off
         }
     }
-}
-
-#include "ceu_log.h"
-void ceu_sys_log (int mode, void* s) {
-    ceu_log(mode, s);
 }
 
 void ceu_os_main ()
