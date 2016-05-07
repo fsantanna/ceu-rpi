@@ -19,8 +19,10 @@
 #define CEU_ISR_OFF()
 #endif
 
+#ifdef CEU_OPT_STACK
 #if defined(CEU_CLEAR) || defined(CEU_INTS) || defined(CEU_ORGS) || defined(CEU_REENTRANT)
 #define CEU_STACK
+#endif
 #endif
 
 #if defined(CEU_OS_KERNEL) || defined(CEU_OS_APP)
@@ -45,7 +47,9 @@
     #define CEU_ASYNCS
     #define CEU_RET
     #define CEU_CLEAR
+#ifdef CEU_OPT_STACK
     #define CEU_STACK
+#endif
 #ifndef __AVR
 #endif
     #define CEU_INTS
